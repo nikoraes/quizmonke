@@ -11,7 +11,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _addTopic() {}
+  void _addTopic() {
+    print("Add topic");
+    // Multi-image camera
+    // https://pub.dev/packages/multiple_image_camera/example
+
+    // upload multiple files
+    // https://stackoverflow.com/questions/63513002/how-can-i-upload-multiple-images-to-firebase-in-flutter-and-get-all-their-downlo
+  }
 
   @override
   Widget build(BuildContext context) {
