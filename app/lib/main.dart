@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quizmonke/auth/authentication.dart';
-
+import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home_screen.dart';
 import 'package:quizmonke/auth/login_screen.dart';
@@ -41,13 +41,17 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-          useMaterial3: true,
-        ),
-        home: const AuthWrapper(),
-      ),
+          title: 'QuizMonke',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.limeAccent),
+            useMaterial3: true,
+          ),
+          home: const AuthWrapper(),
+          routes: {
+            LoginScreen.routeName: (context) => const LoginScreen(),
+            EmailPasswordSignup.routeName: (context) =>
+                const EmailPasswordSignup(),
+          }),
     );
   }
 }

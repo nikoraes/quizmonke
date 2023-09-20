@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/auth/authentication.dart';
 
-class LoginScreen extends StatefulWidget {
-  static String routeName = '/login';
-  const LoginScreen({Key? key}) : super(key: key);
+class EmailPasswordSignup extends StatefulWidget {
+  static String routeName = '/signup';
+  const EmailPasswordSignup({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  EmailPasswordSignupState createState() => EmailPasswordSignupState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class EmailPasswordSignupState extends State<EmailPasswordSignup> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void loginUser() {
-    context.read<FirebaseAuthMethods>().loginWithEmail(
+  void signUpUser() async {
+    context.read<FirebaseAuthMethods>().signUpWithEmail(
           email: emailController.text,
           password: passwordController.text,
           context: context,
@@ -72,37 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
               ElevatedButton(
-                onPressed: loginUser,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: const Text(
-                  "Login",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  context.read<FirebaseAuthMethods>().signInWithGoogle(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: const Text(
-                  "Google Sign In",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, EmailPasswordSignup.routeName);
-                },
+                onPressed: signUpUser,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 40),
                   backgroundColor: Theme.of(context).colorScheme.primary,
@@ -110,6 +79,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: const Text(
                   "Sign up",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Cancel",
                   style: TextStyle(fontSize: 16),
                 ),
               ),
