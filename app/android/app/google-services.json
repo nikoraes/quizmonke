@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "232118707051",
+    "project_id": "schoolscan-4c8d8",
+    "storage_bucket": "schoolscan-4c8d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232118707051:android:e67d6f2d665164447aa22e",
+        "android_client_info": {
+          "package_name": "com.example.quizmonke"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd7qzOMItFNRhqXtb0kvR6eRCRgh8THJE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
