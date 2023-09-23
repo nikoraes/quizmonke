@@ -1,10 +1,66 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
+
 class QuizArguments {
   final String topicId;
+  final List<QuestionItem> questions;
 
-  QuizArguments(this.topicId);
+  QuizArguments(this.topicId, this.questions);
+}
+
+class QuestionItem {
+  final String id;
+  final String type;
+  final String question;
+  final String? answer;
+  // final Map<String, String>? multiAnswer;
+  final List<String>? choices; // For multiple choice questions
+  final List<String>? leftColumn; // For connect_terms questions
+  final List<String>? rightColumn; // For connect_terms questions
+
+  QuestionItem({
+    required this.id,
+    required this.type,
+    required this.question,
+    this.answer,
+    //this.multiAnswer,
+    this.choices, // Add this field for multiple choice questions
+    this.leftColumn, // Add this field for connect_terms questions
+    this.rightColumn, // Add this field for connect_terms questions
+  });
+
+  factory QuestionItem.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    return QuestionItem(
+        id: snapshot.id,
+        type: data?['type'],
+        question: data?['question'],
+        choices:
+            data?['choices'] is Iterable ? List.from(data?['choices']) : null,
+        leftColumn: data?['leftColumn'] is Iterable
+            ? List.from(data?['leftColumn'])
+            : null,
+        rightColumn: data?['rightColumn'] is Iterable
+            ? List.from(data?['rightColumn'])
+            : null,
+        answer: data?['answer']);
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      "type": type,
+      "question": question,
+      if (choices != null) "choices": choices,
+      if (leftColumn != null) "leftColumn": leftColumn,
+      if (rightColumn != null) "rightColumn": rightColumn,
+      if (answer != null) "answer": answer,
+    };
+  }
 }
 
 class QuizScreen extends StatefulWidget {
@@ -22,8 +78,6 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize your list of questions here.
-    questions = jsonList.map((json) => QuestionItem.fromJson(json)).toList();
   }
 
   void checkAnswer(String selectedAnswer) {
@@ -36,8 +90,10 @@ class _QuizScreenState extends State<QuizScreen> {
       if (selectedAnswer == currentQuestion.answer) {
         // Correct answer logic
         // Show a congratulatory screen and move to the next question.
+        print('correct - $selectedAnswer - ${currentQuestion.answer}');
         showCongratulatoryScreen(context);
       } else {
+        print('wrong - $selectedAnswer - ${currentQuestion.answer}');
         // Incorrect answer logic
         // Show the correct answer and allow the user to continue.
         // if (currentQuestion.answer != null) showIncorrectAnswerScreen(currentQuestion.answer);
@@ -49,28 +105,29 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-  void showCongratulatoryScreen(BuildContext context) {
+  void showCongratulatoryScreen(BuildContext parentContext) {
     showDialog(
-      context: context,
-      builder: (context) {
+      context: parentContext,
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Congratulations!'),
           content: const Text('Your answer is correct!'),
           actions: [
             TextButton(
               onPressed: () {
-                // Close the congratulatory dialog
-                Navigator.of(context).pop();
-
+                print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
                 if (currentIndex < questions.length - 1) {
-                  currentIndex++; // Move to the next question
                 } else {
                   // Handle the case when all questions are completed.
                   // You can navigate to a summary screen or perform other actions.
                   // For now, just print a message.
                   print('All questions completed.');
                 }
+                setState(() {
+                  currentIndex++; // Move to the next question
+                });
+                Navigator.pop(parentContext);
               },
               child: const Text('Next Question'),
             ),
@@ -93,10 +150,11 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as QuizArguments;
+    questions = args.questions;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz ${args.topicId}'),
+        title: Text('Quiz ${args.topicId} - $currentIndex'),
       ),
       body: currentIndex < questions.length
           ? QuestionCard(
@@ -112,11 +170,11 @@ class _QuizScreenState extends State<QuizScreen> {
 }
 
 class QuestionCard extends StatelessWidget {
-  final QuestionItem questionItem;
-  final Function(String) onAnswerSelected;
-
   const QuestionCard(
       {super.key, required this.questionItem, required this.onAnswerSelected});
+
+  final QuestionItem questionItem;
+  final Function(String) onAnswerSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -177,49 +235,6 @@ class QuestionCard extends StatelessWidget {
       decoration: const InputDecoration(
         hintText: 'Type your answer here',
       ),
-    );
-  }
-}
-
-class QuestionItem {
-  final String type;
-  final String question;
-  final String? answer;
-  // final Map<String, String>? multiAnswer;
-  final List<String>? choices; // For multiple choice questions
-  final List<String>? leftColumn; // For connect_terms questions
-  final List<String>? rightColumn; // For connect_terms questions
-
-  QuestionItem({
-    required this.type,
-    required this.question,
-    this.answer,
-    //this.multiAnswer,
-    this.choices, // Add this field for multiple choice questions
-    this.leftColumn, // Add this field for connect_terms questions
-    this.rightColumn, // Add this field for connect_terms questions
-  });
-
-  factory QuestionItem.fromJson(Map<String, dynamic> json) {
-    final String type = json['type'];
-    final String question = json['question'];
-    final String? answer = json['answer'];
-    //final Map<String, String>? multiAnswer = json['multi_answer']?.cast<Map<String,String>>(); // For multiple choice questionsjson['multi_answer'];
-    final List<String>? choices =
-        json['choices']?.cast<String>(); // For multiple choice questions
-    final List<String>? leftColumn =
-        json['left_column']?.cast<String>(); // For connect_terms questions
-    final List<String>? rightColumn =
-        json['right_column']?.cast<String>(); // For connect_terms questions
-
-    return QuestionItem(
-      type: type,
-      question: question,
-      answer: answer,
-      // multiAnswer: multiAnswer,
-      choices: choices,
-      leftColumn: leftColumn,
-      rightColumn: rightColumn,
     );
   }
 }

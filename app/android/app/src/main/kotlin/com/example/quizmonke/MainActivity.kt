@@ -1,4 +1,4 @@
-package com.example.quizmonke
+package com.raes.quizmonke
 
 import io.flutter.embedding.android.FlutterActivity
 

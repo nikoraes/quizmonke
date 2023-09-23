@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /topics/{topicId}/files/{filename} {
+    	function isTopicOwner () {
+        return firestore.get(/databases/(default)/documents/topics/$(topicId)).data.roles[request.auth.uid] == 'owner';
+      }
+      function isTopicReader () {
+        return firestore.get(/databases/(default)/documents/topics/$(topicId)).data.roles[request.auth.uid] in ['reader', 'owner'];
+      }
+      allow read: if request.auth != null && isTopicReader();
+      allow write: if request.auth != null && isTopicOwner();
+    }
+  }
+}
