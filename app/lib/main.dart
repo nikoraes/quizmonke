@@ -6,10 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:quizmonke/auth/authentication.dart';
 import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
-import 'package:quizmonke/home_screen.dart';
+import 'package:quizmonke/home/home_screen.dart';
 import 'package:quizmonke/auth/login_screen.dart';
-import 'package:quizmonke/photo_screen.dart';
-import 'package:quizmonke/quiz_screen.dart';
+import 'package:quizmonke/quiz/quiz_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +53,6 @@ class MyApp extends StatelessWidget {
             EmailPasswordSignup.routeName: (context) =>
                 const EmailPasswordSignup(),
             QuizScreen.routeName: (context) => const QuizScreen(),
-            PhotoScreen.routeName: (context) => const PhotoScreen(),
           }),
     );
   }
