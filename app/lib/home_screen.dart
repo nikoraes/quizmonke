@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quizmonke/photo_screen.dart';
@@ -52,7 +53,9 @@ class TopicsListState extends State<TopicsList> {
   final Stream<QuerySnapshot> _topicsStream = FirebaseFirestore.instance
       .collection('topics')
       .where('roles.${FirebaseAuth.instance.currentUser?.uid}',
-          whereIn: ["reader", "owner"]).snapshots();
+          whereIn: ["reader", "owner"])
+      .orderBy(FieldPath.documentId, descending: true)
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +77,7 @@ class TopicsListState extends State<TopicsList> {
                     document.data()! as Map<String, dynamic>;
                 String id = document.id;
                 return TopicCard(
-                  id: id,
-                  name: data['name'],
-                );
+                    id: id, name: data['name'], status: data['status']);
               })
               .toList()
               .cast(),
@@ -89,8 +90,9 @@ class TopicsListState extends State<TopicsList> {
 class TopicCard extends StatelessWidget {
   final String id;
   final String? name;
+  final String? status;
 
-  const TopicCard({super.key, required this.id, this.name});
+  const TopicCard({super.key, required this.id, this.name, this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -107,11 +109,44 @@ class TopicCard extends StatelessWidget {
                 return QuestionItem.fromFirestore(querySnapshot, null);
               })
               .cast<QuestionItem>()
+              .where(
+                (element) => element.type == 'multiple_choice',
+              )
               .toList();
           Navigator.pushNamed(context, QuizScreen.routeName,
               arguments: QuizArguments(id, questions));
         },
         onError: (e) => print("Error completing: $e"),
+      );
+    }
+
+    void showDeleteDialog(BuildContext parentContext, String topicId) {
+      showDialog(
+        context: parentContext,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Delete quiz!'),
+            content: const Text('Are you sure?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(parentContext);
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  FirebaseFirestore.instance
+                      .collection("topics")
+                      .doc(topicId)
+                      .delete();
+                  Navigator.pop(parentContext);
+                },
+                child: const Text('Delete'),
+              ),
+            ],
+          );
+        },
       );
     }
 
@@ -140,6 +175,30 @@ class TopicCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
+                        MenuAnchor(
+                          builder: (BuildContext context,
+                              MenuController controller, Widget? child) {
+                            return IconButton(
+                              onPressed: () {
+                                if (controller.isOpen) {
+                                  controller.close();
+                                } else {
+                                  controller.open();
+                                }
+                              },
+                              icon: const Icon(Icons.more_vert),
+                              tooltip: 'Show menu',
+                            );
+                          },
+                          menuChildren: [
+                            MenuItemButton(
+                              child: const Text('Delete'),
+                              onPressed: () {
+                                showDeleteDialog(context, id);
+                              },
+                            ),
+                          ],
+                        ),
                         IconButton(
                           icon: const Icon(Icons.more_vert),
                           onPressed: () {},
@@ -149,6 +208,11 @@ class TopicCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
+                if (status != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('$status'),
+                  ),
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(id),

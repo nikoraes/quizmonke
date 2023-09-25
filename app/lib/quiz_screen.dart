@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
-
 class QuizArguments {
   final String topicId;
   final List<QuestionItem> questions;
@@ -94,6 +93,7 @@ class _QuizScreenState extends State<QuizScreen> {
         showCongratulatoryScreen(context);
       } else {
         print('wrong - $selectedAnswer - ${currentQuestion.answer}');
+        showIncorrectAnswerScreen(context, '${currentQuestion.answer}');
         // Incorrect answer logic
         // Show the correct answer and allow the user to continue.
         // if (currentQuestion.answer != null) showIncorrectAnswerScreen(currentQuestion.answer);
@@ -137,9 +137,44 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  void showIncorrectAnswerScreen(String correctAnswer) {
-    // Implement the incorrect answer screen logic here
-    // You can show the correct answer and provide an option to continue.
+  void showIncorrectAnswerScreen(
+      BuildContext parentContext, String correctAnswer) {
+    showDialog(
+      context: parentContext,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Bluh!'),
+          content: Text(
+              'Your answer is wrong! The correct answer is $correctAnswer'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(parentContext);
+              },
+              child: const Text('Try again'),
+            ),
+            TextButton(
+              onPressed: () {
+                print('currentIndex: $currentIndex / ${questions.length}');
+                // Move to the next question if there are more questions
+                if (currentIndex < questions.length - 1) {
+                } else {
+                  // Handle the case when all questions are completed.
+                  // You can navigate to a summary screen or perform other actions.
+                  // For now, just print a message.
+                  print('All questions completed.');
+                }
+                setState(() {
+                  currentIndex++; // Move to the next question
+                });
+                Navigator.pop(parentContext);
+              },
+              child: const Text('Next Question'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void showIncorrectMultiAnswerScreen(Map<String, String> correctAnswer) {
@@ -203,8 +238,8 @@ class QuestionCard extends StatelessWidget {
 
   // Helper method to build UI for multiple choice questions
   Widget _buildMultipleChoiceQuestion() {
-    return Column(
-      children: questionItem.choices?.map((choice) {
+    return Column(children: [
+      ...questionItem.choices?.map((choice) {
             return RadioListTile(
               title: Text(choice),
               value: choice,
@@ -215,7 +250,14 @@ class QuestionCard extends StatelessWidget {
             );
           }).toList() ??
           [],
-    );
+
+/*       TextButton(
+        onPressed: () {
+        },
+        child: const Text('Check'),
+        
+      ), */
+    ]);
   }
 
   // Helper method to build UI for connect_terms questions
@@ -223,7 +265,7 @@ class QuestionCard extends StatelessWidget {
     // Implement the UI for connect_terms questions here
     // You can use draggable lists to match terms.
     // Make sure to handle user interactions properly and call onAnswerSelected when appropriate.
-    return const Text('Connect the terms question');
+    return Text('Connect the terms question - ${questionItem.question}');
   }
 
   // Helper method to build UI for free text questions

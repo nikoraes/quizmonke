@@ -3,22 +3,26 @@ import os
 import pathlib
 from typing import Any
 
-from firebase_functions import https_fn
-from firebase_admin import initialize_app, storage
+from firebase_functions import https_fn, options
+from firebase_admin import initialize_app, storage, firestore
 from firebase_functions import firestore_fn, https_fn, storage_fn
 import google.cloud.firestore
 from google.cloud import vision
+
+from langchain.chains.openai_functions import (
+    create_openai_fn_chain,
+    create_structured_output_chain,
+)
 from langchain import PromptTemplate
-
+from langchain.prompts import ChatPromptTemplate
+from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
-
-llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 initialize_app()
 
 
-@https_fn.on_call()
+@https_fn.on_call(memory=options.MemoryOption.MB_512)
 def batchannotate(req: https_fn.CallableRequest) -> Any:
     print(
         "batchannotate auth=%s, data=%s",
@@ -52,12 +56,13 @@ def batchannotate(req: https_fn.CallableRequest) -> Any:
     )
 
     print("Waiting for operation to complete...")
-    response = operation.result(90)
-    print(response)
+    operation.result(90)
     return {"done": True}
 
 
-@storage_fn.on_object_finalized(region="europe-west1")
+@storage_fn.on_object_finalized(
+    region="europe-west1", memory=options.MemoryOption.MB_512
+)
 def generate_quiz(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
@@ -69,6 +74,13 @@ def generate_quiz(
     if "annotations" not in str(file_path):
         return
 
+    topic_id = str(file_path).split("/")[1]
+
+    firestore_client: google.cloud.firestore.Client = firestore.client()
+    firestore_client.collection("topics").document(topic_id).update(
+        {"status": "generating"}
+    )
+
     bucket = storage.bucket(bucket_name)
     blob = bucket.blob(str(file_path))
     annotation_responses = json.loads(blob.download_as_string())
@@ -78,24 +90,109 @@ def generate_quiz(
     fulltext = ""
 
     for res in annotation_responses["responses"]:
-        print(res["context"]["uri"])
-        print(res["fullTextAnnotation"])
-        print(res["fullTextAnnotation"]["text"])
         # add to total text
         fulltext += "\n" + res["fullTextAnnotation"]["text"]
 
-    print("{fulltext}")
+    # TODO: use pydantic or covert to true json schema
+    json_schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "description": {"type": "string"},
+            "language": {"type": "string"},
+            "questions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["free_text", "multiple_choice", "connect_terms"],
+                        },
+                        "question": {"type": "string"},
+                        "choices": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "minItems": 2,
+                        },
+                        "left_column": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "minItems": 2,
+                        },
+                        "right_column": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "minItems": 2,
+                        },
+                        "answer": {
+                            "type": "object",
+                            "additionalProperties": {"type": "string"},
+                        },
+                    },
+                    "required": ["type", "question"],
+                },
+            },
+        },
+        "required": ["name", "questions"],
+    }
 
-    template = """You are a helpful assistant who generates json output. 
-You will receive a piece of text and you will need to create a quiz based on that text. 
-The quiz will have 5 questions and you can have 3 types of questions: 
-1.Multiple choice: provide at least 3 choices per question. The correct answer can be A, B, C, D ...
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a world class algorithm for generating quizzes in structured formats.",
+            ),
+            (
+                "human",
+                """You will receive a piece of text and you will need to create a quiz based on that text (in the same language). You will also detect the language of the text and provide a quiz title and short description.
+The quiz will have 10 questions and you can have 3 types of questions: 
+1.Multiple choice: provide at least 3 choices per question. The correct answer can be A, B, C, D ... 
 2.Connect relevant terms: 3 terms in a random order in 1 column and 3 terms in a random order in the other column. The person that takes the test must connect the terms between the columns. An answer can be A2,B1,C3 for instance.
 3.A free text question where the answer should be a single word.
-For each question, you also need to provide the answer.
-Questions, choices, answers should be in the same language as the provided text.
-Input text: {text}"""
-    prompt = PromptTemplate.from_template(template)
-    prompt.format(text=fulltext)
+For each question, you also need to provide the correct answer. Make sure that the correct answer is exactly the same as the value of the choice.
+You also need to detect the language of the text. The values of the name, description, questions, choices, answers should be in the same language as the provided text.
+Input: {input}""",
+            ),
+            (
+                "human",
+                "Tip: Make sure to answer in the correct format and in the correct language (only the values).",
+            ),
+        ]
+    )
 
-    print(llm(prompt))
+    print(os.environ.get("OPENAI_API_KEY"))
+    llm = ChatOpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+    chain = create_structured_output_chain(json_schema, llm, prompt, verbose=True)
+    res = chain.run(fulltext)
+
+    # prompt = PromptTemplate.from_template(template)
+    # prompt_text = prompt.format(text=fulltext)
+    # print(prompt_text)
+
+    # res = llm(prompt_text)
+
+    print(res)
+
+    firestore_client.collection("topics").document(topic_id).update(
+        {
+            "status": "Done1",
+            "name": res["name"],
+            "language": res["language"],
+            "description": res["description"],
+        }
+    )
+
+    for question in res["questions"]:
+        firestore_client.collection(f"topics/{topic_id}/questions").add(question)
+
+    firestore_client.collection("topics").document(topic_id).update(
+        {
+            "status": "done",
+            "name": res["name"],
+            "language": res["language"],
+            "description": res["description"],
+        }
+    )
+    print("done")
