@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/auth/authentication.dart';
 
+// TODO: https://github.com/RobertBrunhage/Youtube-Tutorials/blob/master/terms_and_policy/assets/privacy_policy.md
+
 class LoginScreen extends StatefulWidget {
   static String routeName = '/login';
   const LoginScreen({Key? key}) : super(key: key);

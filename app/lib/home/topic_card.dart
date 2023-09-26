@@ -73,9 +73,9 @@ class TopicCard extends StatelessWidget {
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () async {
+                onPressed: () {
+                  deleteTopic(topicId);
                   Navigator.pop(parentContext);
-                  await deleteTopic(topicId);
                 },
                 child: const Text('Delete'),
               ),

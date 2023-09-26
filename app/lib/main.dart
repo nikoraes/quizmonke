@@ -44,7 +44,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           title: 'QuizMonke',
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.limeAccent),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromRGBO(9, 8, 9, 1),
+            ),
             useMaterial3: true,
           ),
           home: const AuthWrapper(),

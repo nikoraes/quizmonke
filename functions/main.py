@@ -1,22 +1,19 @@
 import json
-import os
 import pathlib
-from typing import Any
+from typing import Any, List, Optional
 
 from firebase_functions import https_fn, options
 from firebase_admin import initialize_app, storage, firestore
-from firebase_functions import firestore_fn, https_fn, storage_fn
+from firebase_functions import https_fn, storage_fn
+
 import google.cloud.firestore
 from google.cloud import vision
+import vertexai
 
-from langchain.chains.openai_functions import (
-    create_structured_output_chain,
-)
-from langchain import PromptTemplate
-from langchain.prompts import ChatPromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.llms import OpenAI
-
+from langchain.prompts import PromptTemplate
+from langchain.llms import VertexAI
+from langchain.output_parsers import PydanticOutputParser
+from langchain.pydantic_v1 import BaseModel, Field
 
 initialize_app()
 
@@ -59,6 +56,42 @@ def batchannotate(req: https_fn.CallableRequest) -> Any:
     return {"done": True}
 
 
+class Question(BaseModel):
+    type: str = Field(
+        description="the type of question (multiple_choice, free_text or connect_terms)"
+    )
+    question: str = Field(description="the question")
+    choices: Optional[List[str]] = Field(
+        description="the choices for a multiple_choice question (only include field for multiple_choice questions), should have at least 3 values"
+    )
+    left_column: Optional[List[str]] = Field(
+        description="the left column for a connect_terms question (only include field for connect_terms questions), should have at least 3 values"
+    )
+    right_column: Optional[List[str]] = Field(
+        description="the right column for a connect_terms question (only include field for connect_terms questions), should have at least 3 values (same amount as left column)"
+    )
+    answer: str = Field(
+        description="the exact correct answer in case of multiple_choice and free_text, in case of connect_terms, it's the combination of the index of the left and write column with a hyphen, separated by a comma eg. '1-3,2-2,3-1'. this field is always required!"
+    )
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+
+class Topic(BaseModel):
+    name: str = Field(description="the name of the topic")
+    description: str = Field(
+        description="a short description of the content of the topic"
+    )
+    language: str = Field(description="the language of the provided input")
+    questions: List[Question] = Field(
+        description="the list of questions for the quiz, at least 5"
+    )
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+
 @storage_fn.on_object_finalized(
     region="europe-west1", memory=options.MemoryOption.MB_512
 )
@@ -71,7 +104,7 @@ def generate_quiz(
         bucket_name = event.data.bucket
         file_path = pathlib.PurePath(event.data.name)
 
-        print(str(file_path), event.data.name)
+        print(str(file_path))
 
         if "annotations" not in str(file_path):
             return
@@ -116,99 +149,63 @@ def generate_quiz(
             {"status": "generating"}
         )
 
-        # TODO: use pydantic or covert to true json schema
-        json_schema = {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "minLength": 1},
-                "description": {"type": "string", "minLength": 1},
-                "language": {"type": "string", "minLength": 1},
-                "questions": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "type": {
-                                "type": "string",
-                                "enum": [
-                                    "free_text",
-                                    "multiple_choice",
-                                    "connect_terms",
-                                ],
-                            },
-                            "question": {"type": "string", "minLength": 1},
-                            "choices": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "minItems": 2,
-                            },
-                            "left_column": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "minItems": 2,
-                            },
-                            "right_column": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "minItems": 2,
-                            },
-                            "answer": {
-                                "type": "object",
-                                "additionalProperties": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                },
-                            },
-                        },
-                        "required": ["type", "question", "answer"],
-                    },
-                },
-            },
-            "required": ["name", "questions"],
-        }
+        template = """You are a world class algorithm for generating quizzes in structured formats.
+You will receive a piece of text and you will need to create a quiz based on that text (in the same language). You will also detect the language of the text and provide a quiz title and short description.
 
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "You are a world class algorithm for generating quizzes in structured formats.",
-                ),
-                (
-                    "human",
-                    """You will receive a piece of text and you will need to create a quiz based on that text (in the same language). You will also detect the language of the text and provide a quiz title and short description.
-    The quiz will have 10 questions and you can have 3 types of questions: 
-    1.Multiple choice (multiple_choice): provide at least 3 choices per question. The correct answer can be A, B, C, D ... 
-    2.Connect relevant terms (connect_terms): 3 terms in a random order in 1 column and 3 terms in a random order in the other column. The person that takes the test must connect the terms between the columns. An answer can be A2,B1,C3 for instance.
-    3.A free text question where the answer should be a single word.
-    For each question, you also need to provide the correct answer. Make sure that the correct answer is exactly the same as the value of the choice (for )
-    You also need to detect the language of the text (in the 'language field'). The values of the name, description, questions, choices, answers should all be in the same language as the input text.""",
-                ),
-                (
-                    "human",
-                    "Tip: Make sure that all output is in the same language as the input text (all field values).",
-                ),
-                (
-                    "human",
-                    "Tip: Make sure to answer in the correct format.",
-                ),
-                (
-                    "human",
-                    "Input: {input}",
-                ),
-            ]
+The quiz you generate will have multiple questions (at least 5) and you can have 3 types of questions: 
+    1.Multiple choice (multiple_choice): provide at least 3 choices per question and provide the correct answer (exact).
+    2.Connect relevant terms (connect_terms): at least 3 terms in a random order in 1 column and at least 3 terms in a random order in the other column. The person that takes the test must connect the terms between the columns.
+    3.A free text question (free_text). Make sure to ask a question of which the answer can be found in the provided text, and make sure to provide the correct answer in the answer field. 'What do you think of ...?' is not a good question!
+    
+For each question, you also need to provide the correct answer. Make sure that the correct answer is exactly the same as the value of the choice (for connect_terms it should format a string with the indexes of the answers for each column '1-3,2-2,3-1').
+    
+You also need to detect the language of the text (in the \'language field\'). The values of the name, description, questions, choices, answers should all be in the same language as the input text.
+
+Make sure that all output is in the same language as the input text (all field values).
+
+Make sure to answer in the correct format.
+
+{format_instructions}
+
+Input: {input} 
+
+Response: """
+
+        output_parser = PydanticOutputParser(pydantic_object=Topic)
+        format_instructions = output_parser.get_format_instructions()
+        prompt = PromptTemplate(
+            input_variables=["input"],
+            partial_variables={"format_instructions": format_instructions},
+            template=template,
+        )
+        final_prompt = prompt.format(input=fulltext)
+        print(final_prompt)
+
+        vertexai.init(project="schoolscan-4c8d8", location="us-central1")
+        llm = VertexAI(
+            model_name="text-bison@001",
+            candidate_count=1,
+            max_output_tokens=1024,
+            temperature=0.2,
+            top_p=0.8,
+            top_k=40,
         )
 
-        print(os.environ.get("OPENAI_API_KEY"))
-        llm = ChatOpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
-        chain = create_structured_output_chain(json_schema, llm, prompt, verbose=True)
-        res = chain.run(fulltext)
+        res_text = llm(final_prompt)
+
+        # print(os.environ.get("OPENAI_API_KEY"))
+        # llm = ChatOpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+        # chain = create_structured_output_chain(json_schema, llm, prompt, verbose=True)
+        # res = chain.run(fulltext)
 
         # prompt = PromptTemplate.from_template(template)
         # prompt_text = prompt.format(text=fulltext)
         # print(prompt_text)
 
         # res = llm(prompt_text)
+
+        print(res_text)
+        res = json.loads(res_text)  # output_parser.parse(res_text)
 
         print(res)
 
@@ -227,7 +224,7 @@ def generate_quiz(
 
     except Exception as error:
         error_name = type(error).__name__
-        print(f"Error {error_name} while generating quiz", error)
+        print(f"Error {error_name} while generating quiz:", error)
         firestore_client.collection("topics").document(topic_id).update(
             {"status": f"error: {error_name}"}
         )
