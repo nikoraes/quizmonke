@@ -67,7 +67,7 @@ Future<void> onImagesCaptured(List<MediaModel> images) async {
   documentSnapshot.update({"extractStatus": "processing"});
 
   try {
-    final result = await FirebaseFunctions.instance
+    final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
         .httpsCallable('batch_annotate_fn')
         .call({"topicId": documentSnapshot.id, "uris": fileUris});
     final response = result.data as Map<String, dynamic>;

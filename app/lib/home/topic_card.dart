@@ -28,7 +28,7 @@ Future<void> deleteTopic(String topicId) async {
 }
 
 Future<void> generateQuiz(String topicId) async {
-  final result = await FirebaseFunctions.instance
+  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
       .httpsCallable('generate_quiz_fn')
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
@@ -36,12 +36,14 @@ Future<void> generateQuiz(String topicId) async {
 }
 
 Future<void> generateSummary(String topicId) async {
-  final result = await FirebaseFunctions.instance
+  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
       .httpsCallable('summarize_fn')
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
 }
+
+// TODO: https://stackoverflow.com/questions/56273062/flutter-collapsible-expansible-card
 
 class TopicCard extends StatelessWidget {
   final String id;

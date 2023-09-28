@@ -138,7 +138,8 @@ def generate_quiz(topic_id: str):
 
         for file in files:
             # add to total text
-            fulltext += "\n" + file["text"]
+            file_dict = file.to_dict()
+            fulltext += "\n" + file_dict["text"]
 
         template = """You are a world class algorithm for generating quizzes in structured formats.
 You will receive a piece of text and you will need to create a quiz based on that text (in the same language). You will also detect the language of the text and provide a quiz title and short description.
@@ -237,7 +238,8 @@ def summarize(topic_id: str):
 
         for file in files:
             # add to total text
-            texts += texts.append(file["text"])
+            file_dict = file.to_dict()
+            texts += texts.append(file_dict["text"])
 
         # Get your splitter ready
         text_splitter = RecursiveCharacterTextSplitter(
