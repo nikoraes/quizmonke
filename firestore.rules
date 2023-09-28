@@ -21,7 +21,22 @@ service cloud.firestore {
         function allowTopicRead () {
           return get(/databases/$(database)/documents/topics/$(topicId)).data.roles[request.auth.uid] in ['reader', 'owner'];
         }
-        allow read: if request.auth != null && allowTopicRead()
+        function allowTopicWrite () {
+          return get(/databases/$(database)/documents/topics/$(topicId)).data.roles[request.auth.uid] == 'owner';
+        }
+        allow read: if request.auth != null && allowTopicRead();
+        allow delete: if request.auth != null && allowTopicWrite();
+      }
+      
+      match /files/{questionId} {  
+        function allowTopicRead () {
+          return get(/databases/$(database)/documents/topics/$(topicId)).data.roles[request.auth.uid] in ['reader', 'owner'];
+        }
+        function allowTopicWrite () {
+          return get(/databases/$(database)/documents/topics/$(topicId)).data.roles[request.auth.uid] == 'owner';
+        }
+        allow read: if request.auth != null && allowTopicRead();
+        allow delete: if request.auth != null && allowTopicWrite();
       }
     }
     

@@ -9,6 +9,7 @@ import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home/home_screen.dart';
 import 'package:quizmonke/auth/login_screen.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
+import 'package:quizmonke/summary/summary_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
           title: 'QuizMonke',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromRGBO(9, 8, 9, 1),
+              seedColor: const Color.fromRGBO(9, 9, 9, 1),
             ),
             useMaterial3: true,
           ),
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
             EmailPasswordSignup.routeName: (context) =>
                 const EmailPasswordSignup(),
             QuizScreen.routeName: (context) => const QuizScreen(),
+            SummaryScreen.routeName: (context) => const SummaryScreen(),
           }),
     );
   }

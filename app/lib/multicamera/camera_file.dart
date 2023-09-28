@@ -3,7 +3,6 @@ import 'dart:io';
 import "package:flutter/material.dart";
 import "package:camera/camera.dart";
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:quizmonke/multicamera/image_preview.dart';
 
 class CameraFile extends StatefulWidget {
@@ -91,188 +90,143 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
 
   Widget _buildCameraPreview() {
     return GestureDetector(
-        onScaleStart: (details) {
-          zoom = _scaleFactor;
-        },
-        onScaleUpdate: (details) {
-          _scaleFactor = zoom * details.scale;
-          _controller!.setZoomLevel(_scaleFactor);
-        },
-        child: SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: Stack(fit: StackFit.expand, children: [
-              CameraPreview(_controller!),
-              ListView.builder(
-                padding: const EdgeInsets.only(bottom: 100),
-                shrinkWrap: true,
-                itemCount: imageFiles.length,
-                itemBuilder: ((context, index) {
-                  return Row(
-                    children: <Widget>[
-                      Container(
-                        alignment: Alignment.bottomLeft,
-                        // ignore: unnecessary_null_comparison
-                        child: imageFiles[index] == null
-                            ? const Text("No image captured")
-                            : imageFiles.length - 1 == index
-                                ? ScaleTransition(
-                                    scale: scaleAnimation,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder:
-                                                    (BuildContext context) =>
-                                                        ImagePreviewView(
-                                                          File(imageFiles[index]
-                                                              .path),
-                                                          "",
-                                                        )));
-                                      },
-                                      child: Stack(
-                                        children: [
-                                          Image.file(
-                                            File(
-                                              imageFiles[index].path,
-                                            ),
-                                            height: 90,
-                                            width: 60,
-                                          ),
-                                          Positioned(
-                                            top: 0,
-                                            right: 0,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  removeImage();
-                                                });
-                                              },
-                                              child: const CloseButtonIcon(),
-                                              /* SvgPicture.asset(
-                                                  "assets/icons/close_orange.svg"), */
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                : GestureDetector(
+      onScaleStart: (details) {
+        zoom = _scaleFactor;
+      },
+      onScaleUpdate: (details) {
+        _scaleFactor = zoom * details.scale;
+        _controller!.setZoomLevel(_scaleFactor);
+      },
+      child: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CameraPreview(_controller!),
+            ListView.builder(
+              padding: const EdgeInsets.only(bottom: 100),
+              shrinkWrap: true,
+              itemCount: imageFiles.length,
+              itemBuilder: ((context, index) {
+                return Row(
+                  children: <Widget>[
+                    Container(
+                      alignment: Alignment.bottomLeft,
+                      // ignore: unnecessary_null_comparison
+                      child: imageFiles[index] == null
+                          ? const Text("No image captured")
+                          : imageFiles.length - 1 == index
+                              ? ScaleTransition(
+                                  scale: scaleAnimation,
+                                  child: GestureDetector(
                                     onTap: () {
                                       Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (BuildContext context) =>
-                                                  ImagePreviewView(
-                                                    File(
-                                                        imageFiles[index].path),
-                                                    "",
-                                                  )));
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              ImagePreviewView(
+                                            File(imageFiles[index].path),
+                                            "",
+                                          ),
+                                        ),
+                                      );
                                     },
-                                    child: Image.file(
-                                      File(
-                                        imageFiles[index].path,
-                                      ),
-                                      height: 90,
-                                      width: 60,
+                                    child: Stack(
+                                      children: [
+                                        Image.file(
+                                          File(
+                                            imageFiles[index].path,
+                                          ),
+                                          height: 90,
+                                          width: 60,
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                removeImage();
+                                              });
+                                            },
+                                            child: const CloseButtonIcon(),
+                                            /* SvgPicture.asset(
+                                                  "assets/icons/close_orange.svg"), */
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
-                      )
-                    ],
-                  );
-                }),
-                scrollDirection: Axis.horizontal,
-              ),
-              Positioned(
-                right:
-                    MediaQuery.of(context).orientation == Orientation.portrait
-                        ? 340
-                        : null,
-                bottom: 0,
-                left: 0,
-                child: IconButton(
-                  iconSize: 40,
-                  icon: const Icon(
-                    Icons.cameraswitch_outlined,
-                    color: Colors.white,
-                  ),
-                  onPressed: _onCameraSwitch,
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).orientation == Orientation.portrait
-                    ? 0
-                    : null,
-                bottom:
-                    MediaQuery.of(context).orientation == Orientation.portrait
-                        ? 0
-                        : MediaQuery.of(context).size.height / 2.5,
-                right: 0,
-                child: Column(
-                  children: [
-                    SafeArea(
-                      child: IconButton(
-                        iconSize: 80,
-                        icon: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (child, anim) =>
-                                RotationTransition(
-                                  turns: child.key == const ValueKey('icon1')
-                                      ? Tween<double>(begin: 1, end: 0.75)
-                                          .animate(anim)
-                                      : Tween<double>(begin: 0.75, end: 1)
-                                          .animate(anim),
-                                  child: ScaleTransition(
-                                      scale: anim, child: child),
+                                )
+                              : GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            ImagePreviewView(
+                                          File(imageFiles[index].path),
+                                          "",
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Image.file(
+                                    File(
+                                      imageFiles[index].path,
+                                    ),
+                                    height: 90,
+                                    width: 60,
+                                  ),
                                 ),
-                            child: _currIndex == 0
-                                ? Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.white,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    key: const ValueKey("icon1"),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.white,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    key: const ValueKey("icon2"),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                        onPressed: () {
-                          _currIndex = _currIndex == 0 ? 1 : 0;
-                          takePicture();
-                        },
-                      ),
-                    ),
+                    )
                   ],
+                );
+              }),
+              scrollDirection: Axis.horizontal,
+            ),
+            Positioned(
+              right: MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 340
+                  : null,
+              bottom: 0,
+              left: 0,
+              child: IconButton(
+                iconSize: 40,
+                icon: const Icon(
+                  Icons.cameraswitch_outlined,
+                  color: Colors.white,
                 ),
-              )
-            ])));
+                onPressed: _onCameraSwitch,
+              ),
+            ),
+            Positioned(
+              left: MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 0
+                  : null,
+              bottom: MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 0
+                  : MediaQuery.of(context).size.height / 2.5,
+              right: 0,
+              child: Column(
+                children: [
+                  SafeArea(
+                    child: FloatingActionButton(
+                      shape: const CircleBorder(),
+                      onPressed: () {
+                        _currIndex = _currIndex == 0 ? 1 : 0;
+                        takePicture();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _onCameraSwitch() async {

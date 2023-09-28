@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
+import 'package:quizmonke/summary/summary_screen.dart';
 
 Future<void> deleteTopic(String topicId) async {
   final batch = FirebaseFirestore.instance.batch();
@@ -25,12 +27,42 @@ Future<void> deleteTopic(String topicId) async {
   await batch.commit();
 }
 
+Future<void> generateQuiz(String topicId) async {
+  final result = await FirebaseFunctions.instance
+      .httpsCallable('generate_quiz_fn')
+      .call({"topicId": topicId});
+  final response = result.data as Map<String, dynamic>;
+  print("Response: $response");
+}
+
+Future<void> generateSummary(String topicId) async {
+  final result = await FirebaseFunctions.instance
+      .httpsCallable('summarize_fn')
+      .call({"topicId": topicId});
+  final response = result.data as Map<String, dynamic>;
+  print("Response: $response");
+}
+
 class TopicCard extends StatelessWidget {
   final String id;
   final String? name;
+  final String? description;
   final String? status;
+  final String? summary;
+  final String? extractStatus;
+  final String? quizStatus;
+  final String? summaryStatus;
 
-  const TopicCard({super.key, required this.id, this.name, this.status});
+  const TopicCard(
+      {super.key,
+      required this.id,
+      this.name,
+      this.description,
+      this.summary,
+      this.status,
+      this.extractStatus,
+      this.quizStatus,
+      this.summaryStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +88,11 @@ class TopicCard extends StatelessWidget {
         },
         onError: (e) => print("Error completing: $e"),
       );
+    }
+
+    void openSummary(String id, String summary) {
+      Navigator.pushNamed(context, SummaryScreen.routeName,
+          arguments: SummaryArguments(id, summary));
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
@@ -127,6 +164,18 @@ class TopicCard extends StatelessWidget {
                           },
                           menuChildren: [
                             MenuItemButton(
+                              child: const Text('Generate Quiz'),
+                              onPressed: () {
+                                generateQuiz(id);
+                              },
+                            ),
+                            MenuItemButton(
+                              child: const Text('Generate Summary'),
+                              onPressed: () {
+                                generateSummary(id);
+                              },
+                            ),
+                            MenuItemButton(
                               child: const Text('Delete'),
                               onPressed: () {
                                 showDeleteDialog(context, id);
@@ -138,16 +187,53 @@ class TopicCard extends StatelessWidget {
                     ))
                   ],
                 ),
+                if (description != null)
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text('$description'),
+                  ),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(id),
+                ),
                 const SizedBox(height: 20),
                 if (status != null)
                   Align(
                     alignment: Alignment.bottomLeft,
-                    child: Text('$status'),
+                    child: Text('status: $status'),
                   ),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Text(id),
-                )
+                if (extractStatus != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('extraction: $extractStatus'),
+                  ),
+                if (summaryStatus != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('summary: $summaryStatus'),
+                  ),
+                if (quizStatus != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('quiz: $quizStatus'),
+                  ),
+                if (summary != null)
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.text_snippet_outlined),
+                    title: const Text('Summary'),
+                    onTap: () {
+                      openSummary(id, '$summary');
+                    },
+                  ),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.question_mark_outlined),
+                  title: const Text('Quiz'),
+                  onTap: () {
+                    openQuiz(id);
+                  },
+                ),
               ],
             ),
           ),

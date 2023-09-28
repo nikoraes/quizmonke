@@ -3,8 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
-import 'package:quizmonke/home/topic_card.dart';
+import 'package:quizmonke/home/topics_list.dart';
 import 'package:quizmonke/multicamera/camera_file.dart';
 import 'package:quizmonke/multicamera/multiple_image_camera.dart';
 
@@ -38,54 +37,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class TopicsList extends StatefulWidget {
-  const TopicsList({super.key});
-
-  @override
-  TopicsListState createState() => TopicsListState();
-}
-
-class TopicsListState extends State<TopicsList> {
-  final Stream<QuerySnapshot> _topicsStream = FirebaseFirestore.instance
-      .collection('topics')
-      .where('roles.${FirebaseAuth.instance.currentUser?.uid}',
-          whereIn: ["reader", "owner"])
-      .orderBy(FieldPath.documentId, descending: true)
-      .snapshots();
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _topicsStream,
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something went wrong');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading");
-        }
-
-        return ListView(
-          children: snapshot.data!.docs
-              .map((DocumentSnapshot document) {
-                Map<String, dynamic> data =
-                    document.data()! as Map<String, dynamic>;
-                String id = document.id;
-                return TopicCard(
-                    id: id, name: data['name'], status: data['status']);
-              })
-              .toList()
-              .cast(),
-        );
-      },
-    );
-  }
-}
-
 Future<void> onImagesCaptured(List<MediaModel> images) async {
   final newTopic = {
-    "status": "uploading",
+    "extractStatus": "uploading",
     "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"}
   };
   // Store empty topic in database
@@ -110,16 +64,18 @@ Future<void> onImagesCaptured(List<MediaModel> images) async {
 
   print("File URIs: ${fileUris.toString()}");
 
-  documentSnapshot.update({"status": "processing"});
+  documentSnapshot.update({"extractStatus": "processing"});
 
   try {
     final result = await FirebaseFunctions.instance
-        .httpsCallable('batchannotate')
+        .httpsCallable('batch_annotate_fn')
         .call({"topicId": documentSnapshot.id, "uris": fileUris});
     final response = result.data as Map<String, dynamic>;
     print("Response: $response");
   } on FirebaseFunctionsException catch (error) {
-    documentSnapshot.update({"status": "failed"});
+    documentSnapshot.update({
+      "extractStatus": "${error.code} - ${error.message} - ${error.details}"
+    });
 
     print("error code: ${error.code}");
     print("error details: ${error.details}");

@@ -95,9 +95,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
-                child: const Text(
-                  "Google Sign In",
-                  style: TextStyle(fontSize: 16),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image(
+                      image: AssetImage('google_logo.png'),
+                      height: 35.0,
+                    ),
+                    Text(
+                      "Google Sign In",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),
