@@ -5,3 +5,4 @@ langchain~=0.0.300
 openai~=0.28.0
 python-dotenv~=1.0.0
 google-cloud-aiplatform~=1.33.1
+transformers~=4.33.3
