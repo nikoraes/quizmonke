@@ -78,7 +78,9 @@ class TopicCard extends StatelessWidget {
           }
           List<QuestionItem> questions = querySnapshot.docs
               // Check whether type exists
-              .where((element) => element.data()["type"].runtimeType != Null)
+              .where((element) =>
+                  element.data()["type"].runtimeType != Null &&
+                  element.data()["type"] == "multiple_choice")
               .map((querySnapshot) {
             return QuestionItem.fromFirestore(querySnapshot, null);
           }).toList();

@@ -2,7 +2,7 @@ import logging
 from firebase_admin import firestore
 import google.cloud.firestore
 import vertexai
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.llms import VertexAI
 
 # from langchain.chains.summarize import load_summarize_chain
@@ -41,7 +41,8 @@ def summarize(topic_id: str):
             top_k=40,
         )
 
-        prompt_template = """Write a summary of the following input text, in the same language. 
+        prompt_template = """Write a summary of the following input text. 
+You need to detect the language of the input and make sure that the summary is in the same language as the input.
 Make sure that your text is properly structured, and that is easy to read and learn from.
 You can use markdown for subtitles, bulleted or numbered lists, emphasizing, ...
 
