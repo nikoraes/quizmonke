@@ -1,20 +1,12 @@
-import json
-import pathlib
 import logging
-from typing import Any, List, Optional
-from firebase_functions import https_fn, options
-from firebase_admin import initialize_app, storage, firestore
-from firebase_functions import https_fn, storage_fn
+from firebase_admin import firestore
 import google.cloud.firestore
-from google.cloud import vision
 import vertexai
-from langchain.prompts import PromptTemplate
+from langchain import PromptTemplate
 from langchain.llms import VertexAI
-from langchain.output_parsers import PydanticOutputParser
-from langchain.pydantic_v1 import BaseModel, Field
-from langchain.chains.summarize import load_summarize_chain
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-import transformers
+
+# from langchain.chains.summarize import load_summarize_chain
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 def summarize(topic_id: str):
@@ -32,12 +24,12 @@ def summarize(topic_id: str):
             fulltext += document.get("text") + "\n"
 
         # Get your splitter ready
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1500, chunk_overlap=50
-        )
+        # text_splitter = RecursiveCharacterTextSplitter(
+        #     chunk_size=1500, chunk_overlap=50
+        # )
 
         # Split your docs into texts
-        texts = text_splitter.create_documents([fulltext])
+        # texts = text_splitter.create_documents([fulltext])
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -49,12 +41,23 @@ def summarize(topic_id: str):
             top_k=40,
         )
 
+        prompt_template = """Write a summary of the following input text, in the same language. 
+Make sure that your text is properly structured, and that is easy to read and learn from.
+You can use markdown for subtitles, bulleted or numbered lists, emphasizing, ...
+
+INPUT: "{text}"
+
+SUMMARY:"""
+        prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
+        final_prompt = prompt.format(text=fulltext)
+        summary = llm(final_prompt)
+
         # There is a lot of complexity hidden in this one line. I encourage you to check out the video above for more detail
-        chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True)
-        summary = chain.run(texts)
+        # chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True)
+        # summary = chain.run(texts)
 
         firestore_client.collection("topics").document(topic_id).update(
-            {"summaryStatus": "done"}
+            {"summary": summary, "summaryStatus": "done"}
         )
 
         logging.debug(summary)
@@ -64,7 +67,7 @@ def summarize(topic_id: str):
     except Exception as error:
         error_name = type(error).__name__
         logging.error(
-            f"Error while generating summary:", error_name, error, error.__traceback__
+            f"Error while generating summary: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"summaryStatus": f"error: {error_name}"}

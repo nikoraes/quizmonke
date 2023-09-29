@@ -1,21 +1,9 @@
-import json
-import pathlib
 import logging
-from typing import Any, List, Optional
-from firebase_functions import https_fn, options
-from firebase_admin import initialize_app, storage, firestore
-from firebase_functions import https_fn, storage_fn
-import google.cloud.firestore
-from google.cloud import vision
-import vertexai
-import google.cloud.logging
+from typing import Any
+from firebase_admin import initialize_app
+from firebase_functions import https_fn, storage_fn, options
 
-from langchain.prompts import PromptTemplate
-from langchain.llms import VertexAI
-from langchain.output_parsers import PydanticOutputParser
-from langchain.pydantic_v1 import BaseModel, Field
-from langchain.chains.summarize import load_summarize_chain
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+# import google.cloud.logging
 
 from batch_annotate import batch_annotate
 from process_annotations import process_annotations
@@ -25,8 +13,8 @@ from summarize import summarize
 
 initialize_app()
 
-logging_client = google.cloud.logging.Client()
-logging_client.setup_logging()
+# logging_client = google.cloud.logging.Client()
+# logging_client.setup_logging()
 
 
 @https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)

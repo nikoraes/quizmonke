@@ -218,6 +218,7 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
                         _currIndex = _currIndex == 0 ? 1 : 0;
                         takePicture();
                       },
+                      child: const Icon(Icons.camera_alt_outlined),
                     ),
                   ),
                 ],

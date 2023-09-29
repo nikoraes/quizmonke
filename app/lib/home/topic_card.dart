@@ -77,14 +77,11 @@ class TopicCard extends StatelessWidget {
             print('${docSnapshot.id} => ${docSnapshot.data()}');
           }
           List<QuestionItem> questions = querySnapshot.docs
+              // Check whether type exists
+              .where((element) => element.data()["type"].runtimeType != Null)
               .map((querySnapshot) {
-                return QuestionItem.fromFirestore(querySnapshot, null);
-              })
-              .cast<QuestionItem>()
-              .where(
-                (element) => element.type == 'multiple_choice',
-              )
-              .toList();
+            return QuestionItem.fromFirestore(querySnapshot, null);
+          }).toList();
           Navigator.pushNamed(context, QuizScreen.routeName,
               arguments: QuizArguments(id, questions));
         },

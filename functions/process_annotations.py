@@ -1,18 +1,8 @@
 import json
 import pathlib
-from typing import Any, List, Optional
-from firebase_functions import https_fn, options
-from firebase_admin import initialize_app, storage, firestore
-from firebase_functions import https_fn, storage_fn
+from firebase_admin import storage, firestore
+from firebase_functions import storage_fn
 import google.cloud.firestore
-from google.cloud import vision
-import vertexai
-from langchain.prompts import PromptTemplate
-from langchain.llms import VertexAI
-from langchain.output_parsers import PydanticOutputParser
-from langchain.pydantic_v1 import BaseModel, Field
-from langchain.chains.summarize import load_summarize_chain
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 def process_annotations(

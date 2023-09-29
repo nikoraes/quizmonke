@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class QuestionItem {
   final String id;
   final String type;
-  final String question;
+  final String? question;
   final String? answer;
   // final Map<String, String>? multiAnswer;
   final List<String>? choices; // For multiple choice questions
@@ -13,7 +13,7 @@ class QuestionItem {
   QuestionItem({
     required this.id,
     required this.type,
-    required this.question,
+    this.question,
     this.answer,
     //this.multiAnswer,
     this.choices, // Add this field for multiple choice questions
