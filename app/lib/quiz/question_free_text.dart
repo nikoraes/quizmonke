@@ -4,11 +4,13 @@ import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
 
 class QuestionFreeText extends StatefulWidget {
+  final String topicId;
   final QuestionItem questionItem;
   final Function(QuestionResult) onAnswerChecked;
 
   const QuestionFreeText({
     Key? key,
+    required this.topicId,
     required this.questionItem,
     required this.onAnswerChecked,
   }) : super(key: key);
@@ -65,14 +67,19 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
       try {
         final HttpsCallableResult<dynamic> result = await FirebaseFunctions
             .instance
-            .httpsCallable('check_free_text_answer_fn')
+            .httpsCallable('check_answer_free_text_fn')
             .call({
+          "topicId": widget.topicId,
           "question": widget.questionItem.question,
           "answer": widget.questionItem.answer,
           "providedAnswer": currentAnswer,
         });
 
-        bool isCorrect = result.data as bool;
+        if (result.data == "true") {
+          widget.onAnswerChecked(QuestionResult.correct);
+        } else {
+          widget.onAnswerChecked(QuestionResult.wrong);
+        }
         widget.onAnswerChecked(QuestionResult.correct);
       } catch (e) {
         print('Error checking answer: $e');

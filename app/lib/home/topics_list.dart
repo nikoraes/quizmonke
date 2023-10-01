@@ -15,7 +15,7 @@ class TopicsListState extends State<TopicsList> {
       .collection('topics')
       .where('roles.${FirebaseAuth.instance.currentUser?.uid}',
           whereIn: ["reader", "owner"])
-      .orderBy(FieldPath.documentId, descending: true)
+      .orderBy("timestamp", descending: true)
       .snapshots();
 
   @override

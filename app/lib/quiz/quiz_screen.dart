@@ -26,6 +26,7 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  late String topicId;
   late List<QuestionItem> questions;
   int currentIndex = 0;
 
@@ -146,6 +147,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as QuizArguments;
     questions = args.questions;
+    topicId = args.topicId;
 
     int numberCorrect = 0;
     int numberWrong = 0;
@@ -173,20 +175,53 @@ class _QuizScreenState extends State<QuizScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: (currentIndex < questions.length)
-            ? _buildQuestion(
-                ValueKey(questions[currentIndex]), questions[currentIndex],
-                (correct) {
+            ? _buildQuestion(ValueKey(questions[currentIndex]), topicId,
+                questions[currentIndex], (correct) {
                 onAnswerChecked(questions[currentIndex], correct);
               })
-            : const Center(
-                child: Text('Quiz completed!'),
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Quiz completed!',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Results Overview:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text('Correct: $numberCorrect'),
+                  Text('Wrong: $numberWrong'),
+                  Text('Skipped: $numberSkipped'),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Add logic to generate more questions
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    child: const Text('Generate more'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    child: const Text('Back'),
+                  ),
+                ],
               ),
       ),
     );
   }
 }
 
-Widget _buildQuestion(Key key, QuestionItem questionItem,
+Widget _buildQuestion(Key key, String topicId, QuestionItem questionItem,
     Function(QuestionResult) onAnswerChecked) {
   if (questionItem.type == "multiple_choice") {
     return QuestionMultipleChoice(
@@ -199,7 +234,10 @@ Widget _buildQuestion(Key key, QuestionItem questionItem,
         key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
   } else if (questionItem.type == "free_text") {
     return QuestionFreeText(
-        key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
+        key: key,
+        topicId: topicId,
+        questionItem: questionItem,
+        onAnswerChecked: onAnswerChecked);
   } else {
     return InkWell(
       onTap: () {

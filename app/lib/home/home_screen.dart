@@ -75,7 +75,8 @@ class HomeAppBarMenu extends StatelessWidget {
 Future<void> onImagesCaptured(List<MediaModel> images) async {
   final newTopic = {
     "extractStatus": "uploading",
-    "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"}
+    "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"},
+    "timestamp": Timestamp.now()
   };
   // Store empty topic in database
   DocumentReference<Map<String, dynamic>> documentSnapshot =
