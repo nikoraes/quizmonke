@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:quizmonke/quiz/question_connect_terms.dart';
+import 'package:quizmonke/quiz/question_free_text.dart';
 
-import 'package:quizmonke/quiz/question_card.dart';
 import 'package:quizmonke/quiz/question_item.dart';
+import 'package:quizmonke/quiz/question_multiple_choice.dart';
+import 'package:quizmonke/quiz/question_multiple_choice_multi.dart';
 
 class QuizArguments {
   final String topicId;
+  final String topicName;
   final List<QuestionItem> questions;
 
-  QuizArguments(this.topicId, this.questions);
+  QuizArguments(this.topicId, this.topicName, this.questions);
 }
 
 class QuizScreen extends StatefulWidget {
+  // TODO: we should probably have the topic id as a param and retrieve all questions here
   static String routeName = '/quiz';
   const QuizScreen({super.key});
 
@@ -25,34 +30,6 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
-  }
-
-  void checkAnswer(String selectedAnswer) {
-    final currentQuestion = questions[currentIndex];
-    print(
-        'checkAnswer - $selectedAnswer - $currentIndex - ${questions.map((q) => q.answer)} - ${currentQuestion.answer}');
-
-    if (currentQuestion.answer == null) return;
-
-    if (currentQuestion.type == 'multiple_choice' ||
-        currentQuestion.type == 'free_text') {
-      if (selectedAnswer == currentQuestion.answer) {
-        // Correct answer logic
-        // Show a congratulatory screen and move to the next question.
-        print('correct - $selectedAnswer - ${currentQuestion.answer}');
-        showCongratulatoryScreen(context);
-      } else {
-        print('wrong - $selectedAnswer - ${currentQuestion.answer}');
-        showIncorrectAnswerScreen(context, '${currentQuestion.answer}');
-        // Incorrect answer logic
-        // Show the correct answer and allow the user to continue.
-        // if (currentQuestion.answer != null) showIncorrectAnswerScreen(currentQuestion.answer);
-      }
-    } else if (currentQuestion.type == 'connect_terms') {
-      // Handle connect_terms type question here
-      // Compare selected answers with the correct answers
-      // Show congratulatory screen or incorrect answer screen accordingly
-    }
   }
 
   void showCongratulatoryScreen(BuildContext parentContext) {
@@ -88,14 +65,15 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void showIncorrectAnswerScreen(
-      BuildContext parentContext, String correctAnswer) {
+      BuildContext parentContext, QuestionItem questionItem) {
+    // Show dialog
     showDialog(
       context: parentContext,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Bluh!'),
           content: Text(
-              'Your answer is wrong! The correct answer is $correctAnswer'),
+              'Your answer is wrong! The correct answer is ${questionItem.answer}'),
           actions: [
             TextButton(
               onPressed: () {
@@ -127,29 +105,61 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  void showIncorrectMultiAnswerScreen(Map<String, String> correctAnswer) {
-    // Implement the incorrect answer screen logic here
-    // You can show the correct answer and provide an option to continue.
-  }
-
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as QuizArguments;
     questions = args.questions;
 
+    void onAnswerChecked(QuestionItem questionItem, bool answerCorrect) {
+      if (answerCorrect) {
+        showCongratulatoryScreen(context);
+      } else {
+        // Add the question to the end again
+        // questions.add(questionItem);
+        showIncorrectAnswerScreen(context, questionItem);
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz ${args.topicId} - $currentIndex'),
+        title: Text('Quiz ${args.topicName} - $currentIndex'),
       ),
-      body: currentIndex < questions.length
-          ? QuestionCard(
-              questionItem: questions[currentIndex],
-              onAnswerSelected: checkAnswer,
-            )
-          : // Show a final screen or summary of results when all questions are answered.
-          const Center(
-              child: Text('Quiz completed!'),
-            ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(8.0),
+        child: (currentIndex < questions.length)
+            ? _buildQuestion(
+                ValueKey(questions[currentIndex]), questions[currentIndex],
+                (correct) {
+                onAnswerChecked(questions[currentIndex], correct);
+              })
+            : const Center(
+                child: Text('Quiz completed!'),
+              ),
+      ),
+    );
+  }
+}
+
+Widget _buildQuestion(
+    Key key, QuestionItem questionItem, Function(bool) onAnswerChecked) {
+  if (questionItem.type == "multiple_choice") {
+    return QuestionMultipleChoice(
+        key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
+  } else if (questionItem.type == "multiple_choice_multi") {
+    return QuestionMultipleChoiceMulti(
+        key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
+  } else if (questionItem.type == "connect_terms") {
+    return QuestionConnectTerms(
+        key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
+  } else if (questionItem.type == "free_text") {
+    return QuestionFreeText(
+        key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
+  } else {
+    return InkWell(
+      onTap: () {
+        onAnswerChecked(false);
+      },
+      child: Text('Unsupported question type: ${questionItem.type}'),
     );
   }
 }

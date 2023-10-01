@@ -21,21 +21,21 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
   List<XFile> imageFiles = [];
   List<MediaModel> imageList = <MediaModel>[];
   late int _currIndex;
-  late Animation<double> animation;
+  /* late Animation<double> animation;
   late AnimationController _animationController;
   late AnimationController controller;
-  late Animation<double> scaleAnimation;
+  late Animation<double> scaleAnimation; */
 
   addImages(XFile image) {
     setState(() {
       imageFiles.add(image);
-      _animationController = AnimationController(
+      /* _animationController = AnimationController(
           vsync: this, duration: const Duration(milliseconds: 1500));
       animation = Tween<double>(begin: 400, end: 1).animate(scaleAnimation =
           CurvedAnimation(
               parent: _animationController, curve: Curves.elasticOut))
         ..addListener(() {});
-      _animationController.forward();
+      _animationController.forward(); */
     });
   }
 
@@ -117,46 +117,43 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
                       child: imageFiles[index] == null
                           ? const Text("No image captured")
                           : imageFiles.length - 1 == index
-                              ? ScaleTransition(
-                                  scale: scaleAnimation,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              ImagePreviewView(
-                                            File(imageFiles[index].path),
-                                            "",
-                                          ),
+                              ? GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            ImagePreviewView(
+                                          File(imageFiles[index].path),
+                                          "",
                                         ),
-                                      );
-                                    },
-                                    child: Stack(
-                                      children: [
-                                        Image.file(
-                                          File(
-                                            imageFiles[index].path,
-                                          ),
-                                          height: 90,
-                                          width: 60,
+                                      ),
+                                    );
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      Image.file(
+                                        File(
+                                          imageFiles[index].path,
                                         ),
-                                        Positioned(
-                                          top: 0,
-                                          right: 0,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                removeImage();
-                                              });
-                                            },
-                                            child: const CloseButtonIcon(),
-                                            /* SvgPicture.asset(
+                                        height: 90,
+                                        width: 60,
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              removeImage();
+                                            });
+                                          },
+                                          child: const CloseButtonIcon(),
+                                          /* SvgPicture.asset(
                                                   "assets/icons/close_orange.svg"), */
-                                          ),
-                                        )
-                                      ],
-                                    ),
+                                        ),
+                                      )
+                                    ],
                                   ),
                                 )
                               : GestureDetector(
@@ -315,9 +312,9 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
   void dispose() {
     if (_controller != null) {
       _controller!.dispose();
-    } else {
+    } /* else {
       _animationController.dispose();
-    }
+    } */
 
     super.dispose();
   }

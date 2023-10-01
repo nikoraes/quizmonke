@@ -1,5 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quizmonke/auth/policy_dialog.dart';
 import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/auth/authentication.dart';
 
@@ -37,6 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Image(
+                image: AssetImage("assets/logo.png"),
+                height: 80,
+              ),
               Text(
                 "QuizMonke",
                 style: Theme.of(context).textTheme.headlineMedium,
@@ -76,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: loginUser,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
+                  minimumSize: const Size(250, 40),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -91,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   context.read<FirebaseAuthMethods>().signInWithGoogle(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
+                  minimumSize: const Size(250, 40),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -100,8 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image(
-                      image: AssetImage('google_logo.png'),
-                      height: 35.0,
+                      image: AssetImage('assets/google_logo.png'),
+                      height: 25.0,
                     ),
                     Text(
                       "Google Sign In",
@@ -116,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushNamed(context, EmailPasswordSignup.routeName);
                 },
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
+                  minimumSize: const Size(250, 40),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -125,6 +131,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(fontSize: 16),
                 ),
               ),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(text: "By logging in you agree to the "),
+                    TextSpan(
+                      text: "Terms and Conditions",
+                      style:
+                          const TextStyle(decoration: TextDecoration.underline),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          showDialog(
+                              context: context,
+                              builder: (dialogContext) {
+                                return const PolicyDialog(
+                                  mdFileName: "assets/terms_and_conditions.md",
+                                );
+                              });
+                        },
+                    ),
+                    const TextSpan(text: " and "),
+                    const TextSpan(
+                      text: "Privacy Policy",
+                      style: TextStyle(decoration: TextDecoration.underline),
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),

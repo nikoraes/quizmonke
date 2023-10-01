@@ -33,9 +33,9 @@ class Question(BaseModel):
 
 
 class Topic(BaseModel):
-    name: str = Field(description="the name of the topic")
+    name: str = Field(description="the name of the topic (max 5 words)")
     description: str = Field(
-        description="a short description of the content of the topic"
+        description="a short description of the content of the topic (max 20 words)"
     )
     language: str = Field(description="the language of the provided input")
     questions: List[Question] = Field(default=[], description="the list of questions")
@@ -83,7 +83,7 @@ JSON RESPONSE:"""
             template=template,
         )
         final_prompt = prompt.format(input=fulltext)
-        logging.debug(final_prompt)
+        logging.debug(f"generate_quiz - final prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -108,11 +108,11 @@ JSON RESPONSE:"""
 
         # res = llm(prompt_text)
 
-        logging.debug("res_text", res_text)
+        logging.debug(f"generate_quiz - res_text: {res_text}")
 
         res = output_parser.parse(res_text)
 
-        logging.debug(res)
+        logging.debug(f"generate_quiz - res: {res}")
 
         # res_obj = Topic(**res)
         # print("res", res)
@@ -128,17 +128,18 @@ JSON RESPONSE:"""
                 "quizStatus": "done",
                 "name": res.name,
                 "description": res.description,
+                "language": res.language,
             }
         )
 
-        logging.debug("done")
+        logging.debug("generate_quiz - done")
 
         return {"done": True}
 
     except Exception as error:
         error_name = type(error).__name__
         logging.error(
-            f"Error while generating quiz: {error_name} {error} {error.__traceback__}"
+            f"generate_quiz - Error while generating quiz: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"quizStatus": f"error: {error_name}"}

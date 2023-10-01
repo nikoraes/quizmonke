@@ -76,16 +76,12 @@ class TopicCard extends StatelessWidget {
           for (var docSnapshot in querySnapshot.docs) {
             print('${docSnapshot.id} => ${docSnapshot.data()}');
           }
-          List<QuestionItem> questions = querySnapshot.docs
-              // Check whether type exists
-              .where((element) =>
-                  element.data()["type"].runtimeType != Null &&
-                  element.data()["type"] == "multiple_choice")
-              .map((querySnapshot) {
+          List<QuestionItem> questions =
+              querySnapshot.docs.map((querySnapshot) {
             return QuestionItem.fromFirestore(querySnapshot, null);
           }).toList();
           Navigator.pushNamed(context, QuizScreen.routeName,
-              arguments: QuizArguments(id, questions));
+              arguments: QuizArguments(id, "$name", questions));
         },
         onError: (e) => print("Error completing: $e"),
       );
@@ -93,7 +89,7 @@ class TopicCard extends StatelessWidget {
 
     void openSummary(String id, String summary) {
       Navigator.pushNamed(context, SummaryScreen.routeName,
-          arguments: SummaryArguments(id, summary));
+          arguments: SummaryArguments(id, "$name", summary));
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
@@ -193,10 +189,10 @@ class TopicCard extends StatelessWidget {
                     alignment: Alignment.topLeft,
                     child: Text('$description'),
                   ),
-                Align(
+                /* Align(
                   alignment: Alignment.topLeft,
                   child: Text(id),
-                ),
+                ), */
                 const SizedBox(height: 20),
                 if (status != null)
                   Align(

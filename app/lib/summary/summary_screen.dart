@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class SummaryArguments {
   final String topicId;
+  final String topicName;
   final String summary;
 
-  SummaryArguments(this.topicId, this.summary);
+  SummaryArguments(this.topicId, this.topicName, this.summary);
 }
 
 class SummaryScreen extends StatefulWidget {
@@ -30,8 +32,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text('Summary ${args.topicId}'),
+          title: Text(args.topicName),
         ),
-        body: Text(summary));
+        body: Markdown(data: summary));
   }
 }
