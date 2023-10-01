@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quizmonke/auth/authentication.dart';
@@ -52,9 +53,8 @@ class MyApp extends StatelessWidget {
           ),
           home: const AuthWrapper(),
           routes: {
+            // TODO: maybe we can do without named routes
             LoginScreen.routeName: (context) => const LoginScreen(),
-            EmailPasswordSignup.routeName: (context) =>
-                const EmailPasswordSignup(),
             QuizScreen.routeName: (context) => const QuizScreen(),
             SummaryScreen.routeName: (context) => const SummaryScreen(),
           }),

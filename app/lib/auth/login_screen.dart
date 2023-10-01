@@ -1,9 +1,8 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quizmonke/auth/policy_dialog.dart';
 import 'package:quizmonke/auth/policy_screen.dart';
-import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/auth/authentication.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,20 +17,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void loginUser() {
-    context.read<FirebaseAuthMethods>().loginWithEmail(
+  Future<void> loginUser() async {
+    await context.read<FirebaseAuthMethods>().loginWithEmail(
           email: emailController.text,
           password: passwordController.text,
           context: context,
         );
+    await FirebaseAnalytics.instance.logLogin(loginMethod: "email");
   }
 
-  void signUpUser() async {
-    context.read<FirebaseAuthMethods>().signUpWithEmail(
+  Future<void> signUpUser() async {
+    await context.read<FirebaseAuthMethods>().signUpWithEmail(
           email: emailController.text,
           password: passwordController.text,
           context: context,
         );
+    await FirebaseAnalytics.instance.logSignUp(signUpMethod: "email");
   }
 
   @override
@@ -102,8 +103,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () {
-                  context.read<FirebaseAuthMethods>().signInWithGoogle(context);
+                onPressed: () async {
+                  await context
+                      .read<FirebaseAuthMethods>()
+                      .signInWithGoogle(context);
+                  await FirebaseAnalytics.instance
+                      .logLogin(loginMethod: "google");
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(250, 40),
