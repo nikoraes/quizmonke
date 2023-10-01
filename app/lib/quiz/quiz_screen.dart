@@ -14,6 +14,8 @@ class QuizArguments {
   QuizArguments(this.topicId, this.topicName, this.questions);
 }
 
+enum QuestionResult { correct, wrong, skipped }
+
 class QuizScreen extends StatefulWidget {
   // TODO: we should probably have the topic id as a param and retrieve all questions here
   static String routeName = '/quiz';
@@ -105,24 +107,68 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
+  void showSkippedAnswerScreen(
+      BuildContext parentContext, QuestionItem questionItem) {
+    // Show dialog
+    showDialog(
+      context: parentContext,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Skipped!'),
+          content: Text(
+              'You skipped this question! The correct answer is ${questionItem.answer}'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                print('currentIndex: $currentIndex / ${questions.length}');
+                // Move to the next question if there are more questions
+                if (currentIndex < questions.length - 1) {
+                } else {
+                  // Handle the case when all questions are completed.
+                  // You can navigate to a summary screen or perform other actions.
+                  // For now, just print a message.
+                  print('All questions completed.');
+                }
+                setState(() {
+                  currentIndex++; // Move to the next question
+                });
+                Navigator.pop(parentContext);
+              },
+              child: const Text('Next Question'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as QuizArguments;
     questions = args.questions;
 
-    void onAnswerChecked(QuestionItem questionItem, bool answerCorrect) {
-      if (answerCorrect) {
+    int numberCorrect = 0;
+    int numberWrong = 0;
+    int numberSkipped = 0;
+
+    void onAnswerChecked(QuestionItem questionItem, QuestionResult result) {
+      if (result == QuestionResult.correct) {
         showCongratulatoryScreen(context);
+        numberCorrect++;
+      } else if (result == QuestionResult.skipped) {
+        showSkippedAnswerScreen(context, questionItem);
+        numberSkipped++;
       } else {
         // Add the question to the end again
-        // questions.add(questionItem);
+        questions.add(questionItem);
         showIncorrectAnswerScreen(context, questionItem);
+        numberWrong++;
       }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz ${args.topicName} - $currentIndex'),
+        title: Text('${args.topicName} - $currentIndex'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
@@ -140,8 +186,8 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
-Widget _buildQuestion(
-    Key key, QuestionItem questionItem, Function(bool) onAnswerChecked) {
+Widget _buildQuestion(Key key, QuestionItem questionItem,
+    Function(QuestionResult) onAnswerChecked) {
   if (questionItem.type == "multiple_choice") {
     return QuestionMultipleChoice(
         key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
@@ -157,7 +203,7 @@ Widget _buildQuestion(
   } else {
     return InkWell(
       onTap: () {
-        onAnswerChecked(false);
+        onAnswerChecked(QuestionResult.skipped);
       },
       child: Text('Unsupported question type: ${questionItem.type}'),
     );

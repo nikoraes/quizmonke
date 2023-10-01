@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         label: const Text('New'),
         icon: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:quizmonke/quiz/question_item.dart';
+import 'package:quizmonke/quiz/quiz_screen.dart';
 
 class QuestionFreeText extends StatefulWidget {
   final QuestionItem questionItem;
-  final Function(bool) onAnswerChecked;
+  final Function(QuestionResult) onAnswerChecked;
 
   const QuestionFreeText({
     Key? key,
@@ -23,7 +24,6 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text("QuestionFreeText"),
         // Question
         Text(
           widget.questionItem.question ?? '',
@@ -47,7 +47,7 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
         // Skip Button
         TextButton(
           onPressed: () {
-            widget.onAnswerChecked(false);
+            widget.onAnswerChecked(QuestionResult.skipped);
           },
           child: const Text('Skip'),
         ),
@@ -60,7 +60,7 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
     String correctAnswer = widget.questionItem.answer?.trim() ?? '';
 
     if (_isLocalMatch(currentAnswer, correctAnswer)) {
-      widget.onAnswerChecked(true);
+      widget.onAnswerChecked(QuestionResult.correct);
     } else {
       try {
         final HttpsCallableResult<dynamic> result = await FirebaseFunctions
@@ -73,10 +73,11 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
         });
 
         bool isCorrect = result.data as bool;
-        widget.onAnswerChecked(isCorrect);
+        widget.onAnswerChecked(QuestionResult.correct);
       } catch (e) {
         print('Error checking answer: $e');
-        widget.onAnswerChecked(false); // Assume incorrect if there's an error
+        widget.onAnswerChecked(
+            QuestionResult.wrong); // Assume incorrect if there's an error
       }
     }
   }
@@ -85,22 +86,4 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
     return providedAnswer.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '') ==
         correctAnswer.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '');
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      body: QuestionFreeText(
-        questionItem: QuestionItem(
-          id: '3',
-          type: 'free_text',
-          question: 'What is the capital of Italy?',
-          answer: 'Rome',
-        ),
-        onAnswerChecked: (bool isCorrect) {
-          print('Answer is correct: $isCorrect');
-        },
-      ),
-    ),
-  ));
 }

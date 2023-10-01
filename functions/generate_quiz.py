@@ -19,7 +19,7 @@ class Question(BaseModel):
     )
     question: Optional[str] = Field(description="the question")
     choices: Optional[List[str]] = Field(
-        description="the choices for a multiple_choice question (only include field for multiple_choice questions), should have at least 3 values"
+        description="the choices for a multiple_choice question or a multiple_choice_multi question (only include field for multiple_choice questions), should have at least 3 values"
     )
     left_column: Optional[List[str]] = Field(
         description="the left column for a connect_terms question (only include field for connect_terms questions), should have at least 3 values"
@@ -28,7 +28,7 @@ class Question(BaseModel):
         description="the right column for a connect_terms question (only include field for connect_terms questions), should have at least 3 values (same amount as left column)"
     )
     answer: str = Field(
-        description="the exact correct answer in case of multiple_choice and free_text. in case of connect_terms, it's the combination of the index of the left and write column with a hyphen, separated by a comma eg. '1-3,2-2,3-1'. in case of multiple_choice_multi, it's all correct answers separated by a comma eg. 'first correct answer, second correct answer'. this field is always required!"
+        description="the exact correct answer in case of multiple_choice and free_text. in case of connect_terms, it's the combination of the index of the left and write column with a hyphen, separated by a comma eg. '1-3,2-2,3-1'. in case of multiple_choice_multi, it's all correct answers separated by a comma eg. 'first correct answer,second correct answer'. this field is always required!"
     )
 
 

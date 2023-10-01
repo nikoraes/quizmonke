@@ -16,13 +16,13 @@ def summarize(topic_id: str):
         topic_ref = firestore_client.collection("topics").document(topic_id)
         topic_ref.update({"summaryStatus": "generating"})
 
-        lang = ""
-        try:
-            topic = topic_ref.get({"language"}).to_dict()
-            logging.debug(f"summarize - language - {topic}")
-            lang = topic["language"]
-        except:
-            logging.warning("summarize - language not predefined")
+        # lang = ""
+        # try:
+        #     topic = topic_ref.get({"language"}).to_dict()
+        #     logging.debug(f"summarize - language - {topic}")
+        #     lang = topic["language"]
+        # except:
+        #     logging.warning("summarize - language not predefined")
 
         files = firestore_client.collection(f"topics/{topic_id}/files").stream()
 
@@ -48,19 +48,14 @@ def summarize(topic_id: str):
             top_k=40,
         )
 
-        prompt_template = """Write a summary of the following input text. Use markdown for subtitles, bulleted or numbered lists, emphasizing, and so on. Make sure that the summary is in the provided language, or in the same language as the input if the language is not provided.
+        prompt_template = """Write a summary of the following input text in the same language. Use markdown for subtitles, bulleted or numbered lists, emphasizing, and so on. Prefer bullet points and lists over continuous text. Make sure that the summary is in the same language as the input.
 
 **INPUT:**
 "{text}"
 
-**LANGUAGE:**
-"{lang}"
-
 **SUMMARY:**"""
-        prompt = PromptTemplate(
-            template=prompt_template, input_variables=["text", "lang"]
-        )
-        final_prompt = prompt.format(text=fulltext, lang=lang)
+        prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
+        final_prompt = prompt.format(text=fulltext)
         summary = llm(final_prompt)
 
         # There is a lot of complexity hidden in this one line. I encourage you to check out the video above for more detail

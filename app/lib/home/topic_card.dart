@@ -45,7 +45,7 @@ Future<void> generateSummary(String topicId) async {
 
 // TODO: https://stackoverflow.com/questions/56273062/flutter-collapsible-expansible-card
 
-class TopicCard extends StatelessWidget {
+class TopicCard extends StatefulWidget {
   final String id;
   final String? name;
   final String? description;
@@ -65,6 +65,34 @@ class TopicCard extends StatelessWidget {
       this.extractStatus,
       this.quizStatus,
       this.summaryStatus});
+  @override
+  _TopicCardState createState() => _TopicCardState();
+}
+
+class _TopicCardState extends State<TopicCard>
+    with SingleTickerProviderStateMixin {
+  bool isExpanded = false;
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  void toggleExpansion() {
+    setState(() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +109,7 @@ class TopicCard extends StatelessWidget {
             return QuestionItem.fromFirestore(querySnapshot, null);
           }).toList();
           Navigator.pushNamed(context, QuizScreen.routeName,
-              arguments: QuizArguments(id, "$name", questions));
+              arguments: QuizArguments(id, "${widget.name}", questions));
         },
         onError: (e) => print("Error completing: $e"),
       );
@@ -89,7 +117,7 @@ class TopicCard extends StatelessWidget {
 
     void openSummary(String id, String summary) {
       Navigator.pushNamed(context, SummaryScreen.routeName,
-          arguments: SummaryArguments(id, "$name", summary));
+          arguments: SummaryArguments(id, "${widget.name}", summary));
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
@@ -119,82 +147,93 @@ class TopicCard extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: Card(
-        child: InkWell(
-          onTap: () {
-            openQuiz(id);
-          },
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(10, 5, 5, 10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    if (name != null)
-                      Text('$name',
-                          style: Theme.of(context).textTheme.titleMedium),
-                    Expanded(
-                        child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        MenuAnchor(
-                          builder: (BuildContext context,
-                              MenuController controller, Widget? child) {
-                            return IconButton(
-                              onPressed: () {
-                                if (controller.isOpen) {
-                                  controller.close();
-                                } else {
-                                  controller.open();
-                                }
-                              },
-                              icon: const Icon(Icons.more_vert),
-                              tooltip: 'Show menu',
-                            );
-                          },
-                          menuChildren: [
-                            MenuItemButton(
-                              child: const Text('Generate Quiz'),
-                              onPressed: () {
-                                generateQuiz(id);
-                              },
-                            ),
-                            MenuItemButton(
-                              child: const Text('Generate Summary'),
-                              onPressed: () {
-                                generateSummary(id);
-                              },
-                            ),
-                            MenuItemButton(
-                              child: const Text('Delete'),
-                              onPressed: () {
-                                showDeleteDialog(context, id);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ))
-                  ],
+    Widget buildMenu() {
+      return MenuAnchor(
+        builder:
+            (BuildContext context, MenuController controller, Widget? child) {
+          return IconButton(
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            icon: const Icon(Icons.more_vert),
+            tooltip: 'Show menu',
+          );
+        },
+        menuChildren: [
+          MenuItemButton(
+            child: const Text('Generate Quiz'),
+            onPressed: () {
+              generateQuiz(widget.id);
+            },
+          ),
+          MenuItemButton(
+            child: const Text('Generate Summary'),
+            onPressed: () {
+              generateSummary(widget.id);
+            },
+          ),
+          MenuItemButton(
+            child: const Text('Delete'),
+            onPressed: () {
+              showDeleteDialog(context, widget.id);
+            },
+          ),
+        ],
+      );
+    }
+
+    Widget buildMainCard() {
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              if (widget.quizStatus != "done")
+                const SizedBox(
+                  width: 20.0,
+                  height: 20.0,
+                  child: CircularProgressIndicator(),
                 ),
-                if (description != null)
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text('$description'),
+              if (widget.name != null)
+                Expanded(
+                  // Wrap the Text widget with Expanded
+                  child: Text(
+                    '${widget.name}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                /* Align(
+                )
+              else
+                Expanded(
+                  // Wrap the Text widget with Expanded
+                  child: Text(
+                    "Loading",
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              // Menu
+              buildMenu()
+            ],
+          ),
+          const SizedBox(height: 4),
+          if (widget.description != null)
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text('${widget.description}'),
+            ),
+          /* Align(
                   alignment: Alignment.topLeft,
                   child: Text(id),
                 ), */
-                const SizedBox(height: 20),
-                if (status != null)
+          const SizedBox(height: 20),
+          /* if (status != null)
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Text('status: $status'),
@@ -213,22 +252,179 @@ class TopicCard extends StatelessWidget {
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Text('quiz: $quizStatus'),
+                  ), */
+        ],
+      );
+    }
+
+    return Card(
+      margin: const EdgeInsets.all(5.0),
+      child: InkWell(
+        onTap: () {
+          toggleExpansion();
+        },
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 5, 5, 10),
+          child: Column(
+            children: [
+              buildMainCard(),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                child: SizeTransition(
+                  sizeFactor: _animationController
+                      .drive(CurveTween(curve: Curves.easeInOut)),
+                  child: Column(
+                    children: [
+                      if (isExpanded)
+                        ListTile(
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -2),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0.0, vertical: 0.0),
+                          leading: widget.quizStatus == "done"
+                              ? const Icon(Icons.quiz_outlined)
+                              : const SizedBox(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0, // Adjust the strokeWidth
+                                  ),
+                                ),
+                          title: const Text('Quiz'),
+                          onTap: () {
+                            openQuiz(widget.id);
+                          },
+                        ),
+                      if (isExpanded)
+                        ListTile(
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -2),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 0.0, vertical: 0.0),
+                          leading: widget.summaryStatus == "done"
+                              ? const Icon(Icons.text_snippet_outlined)
+                              : const SizedBox(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  child: CircularProgressIndicator(),
+                                ),
+                          title: Row(
+                            children: [
+                              const Text('Summary '),
+                              Badge(
+                                alignment: Alignment.topLeft,
+                                label: const Text('preview'),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                textColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                              )
+                            ],
+                          ),
+                          onTap: () {
+                            openSummary(widget.id, '${widget.summary}');
+                          },
+                        ),
+                    ],
                   ),
-                if (summary != null)
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    /* return Padding(
+      padding: const EdgeInsets.all(5),
+      child: Card(
+        child: InkWell(
+          onTap: () {
+            toggleExpansion();
+          },
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 5, 5, 10),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    if (widget.extractStatus != "done")
+                      const CircularProgressIndicator(),
+                    if (widget.name != null)
+                      Expanded(
+                        // Wrap the Text widget with Expanded
+                        child: Text(
+                          '${widget.name}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    else if (widget.extractStatus != "done")
+                      Expanded(
+                        // Wrap the Text widget with Expanded
+                        child: Text(
+                          "Loading",
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ),
+                    // Menu
+                    buildMenu()
+                  ],
+                ),
+                const SizedBox(height: 4),
+                if (widget.description != null)
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text('${widget.description}'),
+                  ),
+                /* Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(id),
+                ), */
+                const SizedBox(height: 20),
+                /* if (status != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('status: $status'),
+                  ),
+                if (extractStatus != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('extraction: $extractStatus'),
+                  ),
+                if (summaryStatus != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('summary: $summaryStatus'),
+                  ),
+                if (quizStatus != null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('quiz: $quizStatus'),
+                  ), */
+                if (widget.summary != null)
                   ListTile(
                     dense: true,
-                    leading: const Icon(Icons.text_snippet_outlined),
+                    leading: widget.summaryStatus == "done"
+                        ? const Icon(Icons.text_snippet_outlined)
+                        : const CircularProgressIndicator(),
                     title: const Text('Summary'),
                     onTap: () {
-                      openSummary(id, '$summary');
+                      openSummary(widget.id, '${widget.summary}');
                     },
                   ),
                 ListTile(
                   dense: true,
-                  leading: const Icon(Icons.question_mark_outlined),
+                  leading: widget.quizStatus == "done"
+                      ? const Icon(Icons.question_mark_outlined)
+                      : const CircularProgressIndicator(),
                   title: const Text('Quiz'),
                   onTap: () {
-                    openQuiz(id);
+                    openQuiz(widget.id);
                   },
                 ),
               ],
@@ -236,6 +432,12 @@ class TopicCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ); */
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }

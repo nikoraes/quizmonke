@@ -32,13 +32,19 @@ class QuestionItem {
         question: data?['question'],
         choices:
             data?['choices'] is Iterable ? List.from(data?['choices']) : null,
-        leftColumn: data?['leftColumn'] is Iterable
-            ? List.from(data?['leftColumn'])
+        leftColumn: data?['left_column'] is Iterable
+            ? List.from(data?['left_column'])
             : null,
-        rightColumn: data?['rightColumn'] is Iterable
-            ? List.from(data?['rightColumn'])
+        rightColumn: data?['right_column'] is Iterable
+            ? List.from(data?['right_column'])
             : null,
-        answer: data?['answer']);
+        answer: data?['type'] == "connect_terms" &&
+                data?['answer'] != null &&
+                data?['left_column'] is Iterable &&
+                data?['right_column'] is Iterable
+            ? transformIndexPairsToTermPairs(List.from(data?['left_column']),
+                List.from(data?['right_column']), data?['answer'])
+            : data?['answer']);
   }
 
   Map<String, dynamic> toFirestore() {
@@ -46,9 +52,46 @@ class QuestionItem {
       "type": type,
       "question": question,
       if (choices != null) "choices": choices,
-      if (leftColumn != null) "leftColumn": leftColumn,
-      if (rightColumn != null) "rightColumn": rightColumn,
-      if (answer != null) "answer": answer,
+      if (leftColumn != null) "left_column": leftColumn,
+      if (rightColumn != null) "right_column": rightColumn,
+      if (answer != null)
+        "answer": type == "connect_terms" &&
+                leftColumn != null &&
+                rightColumn != null
+            ? transformTermPairsToIndexPairs(leftColumn!, rightColumn!, answer!)
+            : answer,
     };
   }
+}
+
+String transformIndexPairsToTermPairs(
+    List<String> leftColumn, List<String> rightColumn, String originalAnswer) {
+  List<String> originalPairs = originalAnswer.split(',');
+
+  List<String> termPairs = originalPairs.map((pair) {
+    List<int> indexes = pair.split('-').map(int.parse).toList();
+
+    String leftTerm = leftColumn[indexes[0] - 1];
+    String rightTerm = rightColumn[indexes[1] - 1];
+
+    return '$leftTerm-$rightTerm';
+  }).toList();
+
+  return termPairs.join(',');
+}
+
+String transformTermPairsToIndexPairs(
+    List<String> leftColumn, List<String> rightColumn, String originalAnswer) {
+  List<String> termPairs = originalAnswer.split(',');
+
+  List<String> indexPairs = termPairs.map((pair) {
+    List<String> terms = pair.split('-');
+
+    int leftIndex = leftColumn.indexOf(terms[0]) + 1;
+    int rightIndex = rightColumn.indexOf(terms[1]) + 1;
+
+    return '$leftIndex-$rightIndex';
+  }).toList();
+
+  return indexPairs.join(',');
 }

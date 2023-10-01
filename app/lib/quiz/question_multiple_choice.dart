@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:quizmonke/quiz/question_item.dart';
+import 'package:quizmonke/quiz/quiz_screen.dart';
 
 class QuestionMultipleChoice extends StatefulWidget {
   final QuestionItem questionItem;
-  final Function(bool) onAnswerChecked;
+  final Function(QuestionResult) onAnswerChecked;
 
   const QuestionMultipleChoice(
       {super.key, required this.questionItem, required this.onAnswerChecked});
@@ -20,7 +21,6 @@ class _QuestionMultipleChoiceState extends State<QuestionMultipleChoice> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text("QuestionMultipleChoice"),
         // Question
         Text(
           widget.questionItem.question ?? '',
@@ -60,7 +60,9 @@ class _QuestionMultipleChoiceState extends State<QuestionMultipleChoice> {
           onPressed: currentAnswer != null
               ? () {
                   bool isCorrect = currentAnswer == widget.questionItem.answer;
-                  widget.onAnswerChecked(isCorrect);
+                  widget.onAnswerChecked(isCorrect
+                      ? QuestionResult.correct
+                      : QuestionResult.wrong);
                 }
               : null,
           child: const Text('Check Answer'),
@@ -68,7 +70,7 @@ class _QuestionMultipleChoiceState extends State<QuestionMultipleChoice> {
         // Skip Button
         TextButton(
           onPressed: () {
-            widget.onAnswerChecked(false);
+            widget.onAnswerChecked(QuestionResult.skipped);
           },
           child: const Text('Skip'),
         ),

@@ -2,10 +2,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quizmonke/auth/policy_dialog.dart';
+import 'package:quizmonke/auth/policy_screen.dart';
 import 'package:quizmonke/auth/signup_screen.dart';
 import 'package:quizmonke/auth/authentication.dart';
-
-// TODO: https://github.com/RobertBrunhage/Youtube-Tutorials/blob/master/terms_and_policy/assets/privacy_policy.md
 
 class LoginScreen extends StatefulWidget {
   static String routeName = '/login';
@@ -27,17 +26,26 @@ class _LoginScreenState extends State<LoginScreen> {
         );
   }
 
+  void signUpUser() async {
+    context.read<FirebaseAuthMethods>().signUpWithEmail(
+          email: emailController.text,
+          password: passwordController.text,
+          context: context,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
           child: Center(
         child: Container(
-          constraints: BoxConstraints.loose(const Size(400, 600)),
+          constraints: BoxConstraints.loose(const Size(400, 700)),
           padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+            // mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center, // A
             children: [
               const Image(
                 image: AssetImage("assets/logo.png"),
@@ -79,15 +87,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 40),
+              const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: loginUser,
+                onPressed: signUpUser,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(250, 40),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
                 child: const Text(
-                  "Login",
+                  "Sign up",
                   style: TextStyle(fontSize: 16),
                 ),
               ),
@@ -117,20 +126,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, EmailPasswordSignup.routeName);
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(250, 40),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                ),
+              TextButton(
+                onPressed: loginUser,
+                style: TextButton.styleFrom(minimumSize: const Size(250, 40)),
                 child: const Text(
-                  "Sign up",
+                  "Login",
                   style: TextStyle(fontSize: 16),
                 ),
               ),
+              const SizedBox(height: 8),
               Text.rich(
                 TextSpan(
                   children: [
@@ -141,23 +145,39 @@ class _LoginScreenState extends State<LoginScreen> {
                           const TextStyle(decoration: TextDecoration.underline),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          showDialog(
-                              context: context,
-                              builder: (dialogContext) {
-                                return const PolicyDialog(
-                                  mdFileName: "assets/terms_and_conditions.md",
-                                );
-                              });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PolicyScreen(
+                                title: 'Terms and Conditions',
+                                mdFileName: 'assets/terms_and_conditions.md',
+                              ),
+                            ),
+                          );
                         },
                     ),
                     const TextSpan(text: " and "),
-                    const TextSpan(
+                    TextSpan(
                       text: "Privacy Policy",
-                      style: TextStyle(decoration: TextDecoration.underline),
+                      style:
+                          const TextStyle(decoration: TextDecoration.underline),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PolicyScreen(
+                                title: 'Privacy Policy',
+                                mdFileName: 'assets/privacy_policy.md',
+                              ),
+                            ),
+                          );
+                        },
                     ),
                   ],
                 ),
-              )
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
