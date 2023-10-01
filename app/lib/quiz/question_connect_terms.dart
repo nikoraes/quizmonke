@@ -1,114 +1,184 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:quizmonke/quiz/question_item.dart';
+import 'package:quizmonke/quiz/quiz_screen.dart';
 
-class ConnectTermsQuestion extends StatefulWidget {
+class QuestionConnectTerms extends StatefulWidget {
   final QuestionItem questionItem;
-  final Function(String) onAnswerSelected;
+  final Function(QuestionResult) onAnswerChecked;
 
-  const ConnectTermsQuestion({
+  const QuestionConnectTerms({
     Key? key,
     required this.questionItem,
-    required this.onAnswerSelected,
+    required this.onAnswerChecked,
   }) : super(key: key);
 
   @override
-  _ConnectTermsQuestionState createState() => _ConnectTermsQuestionState();
+  _QuestionConnectTermsState createState() => _QuestionConnectTermsState();
 }
 
-class _ConnectTermsQuestionState extends State<ConnectTermsQuestion> {
-  List<String> _leftColumn = [];
-  List<String> _rightColumn = [];
+class _Pair {
+  String left;
+  String right;
+  Color color;
 
-  @override
-  void initState() {
-    super.initState();
-    _leftColumn = widget.questionItem.leftColumn ?? [];
-    _rightColumn = widget.questionItem.rightColumn ?? [];
-  }
+  _Pair({required this.left, required this.right, required this.color});
+}
+
+class _QuestionConnectTermsState extends State<QuestionConnectTerms> {
+  List<_Pair> selectedPairs = [];
+  _Pair? currentlySelectedPair;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Question
         Text(
-          'Connect the terms question - ${widget.questionItem.question}',
+          widget.questionItem.question ?? '',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(
-          height: 200,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              for (var term in _leftColumn)
-                Draggable(
-                  data: term,
-                  feedback: Container(
-                    width: 100,
-                    height: 50,
-                    color: Colors.green,
-                    child: Center(
-                      child: Text(term),
-                    ),
-                  ),
-                  onDragEnd: (details) {
-                    int index = _leftColumn.indexOf(term);
-                    _leftColumn.remove(term);
-                    _rightColumn.insert(index, term);
-                    setState(() {});
-                  },
-                  child: Container(
-                    width: 100,
-                    height: 50,
-                    color: Colors.blue,
-                    child: Center(
-                      child: Text(term),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+        const SizedBox(height: 20),
+        // Connect Terms
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildColumn(widget.questionItem.leftColumn, "left"),
+            _buildColumn(widget.questionItem.rightColumn, "right"),
+          ],
         ),
-        SizedBox(
-          height: 200,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              for (var term in _rightColumn)
-                Draggable(
-                  data: term,
-                  feedback: Container(
-                    width: 100,
-                    height: 50,
-                    color: Colors.green,
-                    child: Center(
-                      child: Text(term),
-                    ),
-                  ),
-                  onDragEnd: (details) {
-                    int index = _rightColumn.indexOf(term);
-                    _rightColumn.remove(term);
-                    _leftColumn.insert(index, term);
-                    setState(() {});
-                  },
-                  child: Container(
-                    width: 100,
-                    height: 50,
-                    color: Colors.red,
-                    child: Center(
-                      child: Text(term),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+        const SizedBox(height: 20),
+        // Check Answer Button
+        ElevatedButton(
+          onPressed: selectedPairs.isNotEmpty &&
+                  selectedPairs.length == widget.questionItem.leftColumn!.length
+              ? () {
+                  bool isCorrect = _areAnswersCorrect();
+                  widget.onAnswerChecked(isCorrect
+                      ? QuestionResult.correct
+                      : QuestionResult.wrong);
+                }
+              : null,
+          child: const Text('Check Answer'),
         ),
+        // Skip Button
         TextButton(
           onPressed: () {
-            String answer = _leftColumn.join(',');
-            widget.onAnswerSelected(answer);
+            widget.onAnswerChecked(QuestionResult.skipped);
           },
-          child: const Text('Submit'),
+          child: const Text('Skip'),
         ),
       ],
     );
+  }
+
+  Widget _buildColumn(List<String>? terms, String columnType) {
+    final double boxWidth = MediaQuery.of(context).size.width *
+        0.4; // Adjust the percentage as needed
+
+    return Column(
+      children: terms?.map((term) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  final pairToRemove = selectedPairs.firstWhere(
+                    (pair) =>
+                        (pair.left == term && columnType == 'left') ||
+                        (pair.right == term && columnType == 'right'),
+                    orElse: () =>
+                        _Pair(left: '', right: '', color: Colors.grey),
+                  );
+
+                  if (pairToRemove.left.isNotEmpty ||
+                      pairToRemove.right.isNotEmpty) {
+                    selectedPairs.remove(pairToRemove);
+                  }
+
+                  if (currentlySelectedPair == null ||
+                      (currentlySelectedPair!.right.isNotEmpty &&
+                          columnType == 'right') ||
+                      (currentlySelectedPair!.left.isNotEmpty &&
+                          columnType == 'left')) {
+                    currentlySelectedPair = _Pair(
+                        left: columnType == 'left' ? term : '',
+                        right: columnType == 'right' ? term : '',
+                        color: _generateRandomColor());
+                  } else if (currentlySelectedPair!.right.isEmpty &&
+                      currentlySelectedPair!.left.isNotEmpty &&
+                      columnType == 'right') {
+                    currentlySelectedPair!.right = term;
+                    selectedPairs.add(currentlySelectedPair!);
+                    currentlySelectedPair = null;
+                  } else if (currentlySelectedPair!.left.isEmpty &&
+                      currentlySelectedPair!.right.isNotEmpty &&
+                      columnType == 'left') {
+                    currentlySelectedPair!.left = term;
+                    selectedPairs.add(currentlySelectedPair!);
+                    currentlySelectedPair = null;
+                  } else if (currentlySelectedPair!.right == term) {
+                    currentlySelectedPair!.right = '';
+                  } else if (currentlySelectedPair!.left == term) {
+                    currentlySelectedPair!.left = '';
+                  }
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: _getPairColor(term, columnType),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Container(
+                    width: boxWidth,
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      term,
+                      style: const TextStyle(color: Colors.white),
+                      textAlign: TextAlign.center,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList() ??
+          [],
+    );
+  }
+
+  Color _getPairColor(String term, String columnType) {
+    if (currentlySelectedPair != null &&
+        currentlySelectedPair?.color != null &&
+        (columnType == 'left' && term == currentlySelectedPair?.left ||
+            columnType == 'right' && term == currentlySelectedPair?.right)) {
+      return currentlySelectedPair!.color;
+    }
+    _Pair? pair = selectedPairs.firstWhere(
+      (pair) =>
+          (columnType == 'left' && pair.left == term) ||
+          (columnType == 'right' && pair.right == term),
+      orElse: () => _Pair(left: term, right: '', color: Colors.grey),
+    );
+
+    return pair.color;
+  }
+
+  Color _generateRandomColor() {
+    return Colors.primaries[Random().nextInt(Colors.primaries.length)];
+  }
+
+  bool _areAnswersCorrect() {
+    Set<String> correctPairs =
+        Set.from(widget.questionItem.answer?.split(',') ?? []);
+
+    Set<String> selectedPairStrings = Set.from(
+      selectedPairs.map((pair) => '${pair.left}-${pair.right}'),
+    );
+
+    return correctPairs.containsAll(selectedPairStrings) &&
+        selectedPairStrings.containsAll(correctPairs);
   }
 }

@@ -34,7 +34,10 @@ class FirebaseAuthMethods {
         email: email,
         password: password,
       );
-      await sendEmailVerification(context);
+
+      if (context.mounted) {
+        await sendEmailVerification(context);
+      }
     } on FirebaseAuthException catch (e) {
       // if you want to display your own custom error message
       if (e.code == 'weak-password') {
@@ -42,8 +45,10 @@ class FirebaseAuthMethods {
       } else if (e.code == 'email-already-in-use') {
         print('The account already exists for that email.');
       }
-      showSnackBar(
-          context, e.message!); // Displaying the usual firebase error message
+      if (context.mounted) {
+        showSnackBar(
+            context, e.message!); // Displaying the usual firebase error message
+      }
     }
   }
 
@@ -59,12 +64,16 @@ class FirebaseAuthMethods {
         password: password,
       );
       if (!user.emailVerified) {
-        await sendEmailVerification(context);
-        // restrict access to certain things using provider
-        // transition to another page instead of home screen
+        if (context.mounted) {
+          await sendEmailVerification(context);
+          // restrict access to certain things using provider
+          // transition to another page instead of home screen
+        }
       }
     } on FirebaseAuthException catch (e) {
-      showSnackBar(context, e.message!); // Displaying the error message
+      if (context.mounted) {
+        showSnackBar(context, e.message!); // Displaying the error message
+      }
     }
   }
 

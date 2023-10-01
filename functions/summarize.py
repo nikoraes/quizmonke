@@ -13,9 +13,16 @@ def summarize(topic_id: str):
     firestore_client: google.cloud.firestore.Client = firestore.client()
 
     try:
-        firestore_client.collection("topics").document(topic_id).update(
-            {"summaryStatus": "generating"}
-        )
+        topic_ref = firestore_client.collection("topics").document(topic_id)
+        topic_ref.update({"summaryStatus": "generating"})
+
+        # lang = ""
+        # try:
+        #     topic = topic_ref.get({"language"}).to_dict()
+        #     logging.debug(f"summarize - language - {topic}")
+        #     lang = topic["language"]
+        # except:
+        #     logging.warning("summarize - language not predefined")
 
         files = firestore_client.collection(f"topics/{topic_id}/files").stream()
 
@@ -41,14 +48,12 @@ def summarize(topic_id: str):
             top_k=40,
         )
 
-        prompt_template = """Write a summary of the following input text. 
-You need to detect the language of the input and make sure that the summary is in the same language as the input.
-Make sure that your text is properly structured, and that is easy to read and learn from.
-You can use markdown for subtitles, bulleted or numbered lists, emphasizing, ...
+        prompt_template = """Write a summary of the following input text in the same language. Use markdown for subtitles, bulleted or numbered lists, emphasizing, and so on. Prefer bullet points and lists over continuous text. Make sure that the summary is in the same language as the input.
 
-INPUT: "{text}"
+**INPUT:**
+"{text}"
 
-SUMMARY:"""
+**SUMMARY:**"""
         prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
         final_prompt = prompt.format(text=fulltext)
         summary = llm(final_prompt)
@@ -57,9 +62,7 @@ SUMMARY:"""
         # chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True)
         # summary = chain.run(texts)
 
-        firestore_client.collection("topics").document(topic_id).update(
-            {"summary": summary, "summaryStatus": "done"}
-        )
+        topic_ref.update({"summary": summary, "summaryStatus": "done"})
 
         logging.debug(summary)
 
@@ -68,7 +71,7 @@ SUMMARY:"""
     except Exception as error:
         error_name = type(error).__name__
         logging.error(
-            f"Error while generating summary: {error_name} {error} {error.__traceback__}"
+            f"summarize - Error while generating summary: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"summaryStatus": f"error: {error_name}"}

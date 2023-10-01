@@ -20,9 +20,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.background,
-        title: const Text('QuizMonke'),
-      ),
+          backgroundColor: Theme.of(context).colorScheme.background,
+          title: const Text('QuizMonke'),
+          actions: const <Widget>[HomeAppBarMenu()]),
       body: const TopicsList(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -32,7 +32,42 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         label: const Text('New'),
         icon: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+    );
+  }
+}
+
+class HomeAppBarMenu extends StatelessWidget {
+  const HomeAppBarMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+        return IconButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          icon: const Icon(Icons.more_vert),
+          tooltip: 'Show menu',
+        );
+      },
+      menuChildren: [
+        MenuItemButton(
+          child: const Text('Log out'),
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+          },
+        ),
+        const MenuItemButton(
+          child: Text('Delete account'),
+        ),
+      ],
     );
   }
 }
@@ -40,7 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
 Future<void> onImagesCaptured(List<MediaModel> images) async {
   final newTopic = {
     "extractStatus": "uploading",
-    "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"}
+    "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"},
+    "timestamp": Timestamp.now()
   };
   // Store empty topic in database
   DocumentReference<Map<String, dynamic>> documentSnapshot =

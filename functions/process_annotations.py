@@ -1,4 +1,5 @@
 import json
+import logging
 import pathlib
 from firebase_admin import storage, firestore
 from firebase_functions import storage_fn
@@ -24,7 +25,7 @@ def process_annotations(
     blob = bucket.blob(str(file_path))
     annotation_responses = json.loads(blob.download_as_string())
 
-    print(annotation_responses)
+    logging.debug(f"process_annotations - {annotation_responses}")
 
     for res in annotation_responses["responses"]:
         # store in db

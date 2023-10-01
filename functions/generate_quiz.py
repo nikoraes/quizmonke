@@ -19,7 +19,7 @@ class Question(BaseModel):
     )
     question: Optional[str] = Field(description="the question")
     choices: Optional[List[str]] = Field(
-        description="the choices for a multiple_choice question (only include field for multiple_choice questions), should have at least 3 values"
+        description="the choices for a multiple_choice question or a multiple_choice_multi question (only include field for multiple_choice questions), should have at least 3 values"
     )
     left_column: Optional[List[str]] = Field(
         description="the left column for a connect_terms question (only include field for connect_terms questions), should have at least 3 values"
@@ -28,14 +28,14 @@ class Question(BaseModel):
         description="the right column for a connect_terms question (only include field for connect_terms questions), should have at least 3 values (same amount as left column)"
     )
     answer: str = Field(
-        description="the exact correct answer in case of multiple_choice and free_text. in case of connect_terms, it's the combination of the index of the left and write column with a hyphen, separated by a comma eg. '1-3,2-2,3-1'. in case of multiple_choice_multi, it's all correct answers separated by a comma eg. 'first correct answer, second correct answer'. this field is always required!"
+        description="the exact correct answer in case of multiple_choice and free_text. in case of connect_terms, it's the combination of the index of the left and write column with a hyphen, separated by a comma eg. '1-3,2-2,3-1'. in case of multiple_choice_multi, it's all correct answers separated by a comma eg. 'first correct answer,second correct answer'. this field is always required!"
     )
 
 
 class Topic(BaseModel):
-    name: str = Field(description="the name of the topic")
+    name: str = Field(description="the name of the topic (max 5 words)")
     description: str = Field(
-        description="a short description of the content of the topic"
+        description="a short description of the content of the topic (max 20 words)"
     )
     language: str = Field(description="the language of the provided input")
     questions: List[Question] = Field(default=[], description="the list of questions")
@@ -83,7 +83,7 @@ JSON RESPONSE:"""
             template=template,
         )
         final_prompt = prompt.format(input=fulltext)
-        logging.debug(final_prompt)
+        logging.debug(f"generate_quiz - final prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -108,11 +108,11 @@ JSON RESPONSE:"""
 
         # res = llm(prompt_text)
 
-        logging.debug("res_text", res_text)
+        logging.debug(f"generate_quiz - res_text: {res_text}")
 
         res = output_parser.parse(res_text)
 
-        logging.debug(res)
+        logging.debug(f"generate_quiz - res: {res}")
 
         # res_obj = Topic(**res)
         # print("res", res)
@@ -128,17 +128,18 @@ JSON RESPONSE:"""
                 "quizStatus": "done",
                 "name": res.name,
                 "description": res.description,
+                "language": res.language,
             }
         )
 
-        logging.debug("done")
+        logging.debug("generate_quiz - done")
 
         return {"done": True}
 
     except Exception as error:
         error_name = type(error).__name__
         logging.error(
-            f"Error while generating quiz: {error_name} {error} {error.__traceback__}"
+            f"generate_quiz - Error while generating quiz: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"quizStatus": f"error: {error_name}"}

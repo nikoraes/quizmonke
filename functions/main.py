@@ -6,6 +6,7 @@ from firebase_functions import https_fn, storage_fn, options
 # import google.cloud.logging
 
 from batch_annotate import batch_annotate
+from check_answer_free_text import check_answer_free_text
 from process_annotations import process_annotations
 from generate_quiz import generate_quiz
 from summarize import summarize
@@ -56,3 +57,12 @@ def generate_quiz_fn(req: https_fn.CallableRequest) -> Any:
 def summarize_fn(req: https_fn.CallableRequest) -> Any:
     topic_id = req.data["topicId"]
     return summarize(topic_id)
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+def check_answer_free_text_fn(req: https_fn.CallableRequest) -> Any:
+    topic_id = req.data["topicId"]
+    question = req.data["question"]
+    answer = req.data["answer"]
+    provided_answer = req.data["providedAnswer"]
+    return check_answer_free_text(topic_id, question, answer, provided_answer)
