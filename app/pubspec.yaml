@@ -25,6 +25,7 @@ dependencies:
   cloud_functions: ^4.4.1
   flutter_markdown: ^0.6.17+3
   firebase_analytics: ^10.5.0
+  firebase_app_check: ^0.2.0
 
 dev_dependencies:
   flutter_test:
