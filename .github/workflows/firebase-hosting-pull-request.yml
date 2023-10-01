@@ -9,12 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: flutter pub get
+        working-directory: "app"
+      - run: flutter test
+        working-directory: "app"
       - run: flutter build web
-        working-directory: "./app"
-
+        working-directory: "app"
       - run: cp -a app/build/web/. public
-
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
