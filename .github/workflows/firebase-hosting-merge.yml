@@ -19,6 +19,7 @@ jobs:
       - run: flutter build web
         working-directory: "app"
       - run: cp -a app/build/web/. public
+      - run: ls -R public
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
