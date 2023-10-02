@@ -28,6 +28,8 @@ Future<void> deleteTopic(String topicId) async {
 }
 
 Future<void> generateQuiz(String topicId) async {
+  // TODO: Set to generating immediately, because function cold start now makes this take a while
+  // then try catch and do something
   final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
       .httpsCallable('generate_quiz_fn')
       .call({"topicId": topicId});
@@ -36,8 +38,10 @@ Future<void> generateQuiz(String topicId) async {
 }
 
 Future<void> generateSummary(String topicId) async {
+  // TODO: Set to generating immediately, because function cold start now makes this take a while
+  // then try catch and do something
   final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
-      .httpsCallable('summarize_fn')
+      .httpsCallable('generate_summary_fn')
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
@@ -98,16 +102,21 @@ class _TopicCardState extends State<TopicCard>
   Widget build(BuildContext context) {
     void openQuiz(String id) async {
       print("Card $id Clicked");
+      // Get all questions from store
       FirebaseFirestore.instance.collection("topics/$id/questions").get().then(
         (querySnapshot) {
           print("Successfully completed");
           for (var docSnapshot in querySnapshot.docs) {
             print('${docSnapshot.id} => ${docSnapshot.data()}');
           }
+          // Parse to QuestionItem
           List<QuestionItem> questions =
               querySnapshot.docs.map((querySnapshot) {
             return QuestionItem.fromFirestore(querySnapshot, null);
           }).toList();
+          // Shuffle questions
+          questions.shuffle();
+          // Send to quiz (TODO: avoid using named route)
           Navigator.pushNamed(context, QuizScreen.routeName,
               arguments: QuizArguments(id, "${widget.name}", questions));
         },
@@ -194,6 +203,7 @@ class _TopicCardState extends State<TopicCard>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
+              // TODO: progress indicator should have more padding
               if (widget.quizStatus != "done")
                 const SizedBox(
                   width: 20.0,
@@ -280,9 +290,10 @@ class _TopicCardState extends State<TopicCard>
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 0.0),
+                              horizontal: 2.0, vertical: 0.0),
                           leading: widget.quizStatus == "done"
                               ? const Icon(Icons.quiz_outlined)
+                              // TODO: show error icon if status is error
                               : const SizedBox(
                                   width: 20.0,
                                   height: 20.0,
@@ -300,9 +311,10 @@ class _TopicCardState extends State<TopicCard>
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 0.0),
+                              horizontal: 2.0, vertical: 0.0),
                           leading: widget.summaryStatus == "done"
                               ? const Icon(Icons.text_snippet_outlined)
+                              // TODO: show error icon if status is error
                               : const SizedBox(
                                   width: 20.0,
                                   height: 20.0,
@@ -310,7 +322,7 @@ class _TopicCardState extends State<TopicCard>
                                 ),
                           title: Row(
                             children: [
-                              const Text('Summary '),
+                              const Text('Summary'),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label: const Text('preview'),
@@ -324,6 +336,28 @@ class _TopicCardState extends State<TopicCard>
                           onTap: () {
                             openSummary(widget.id, '${widget.summary}');
                           },
+                        ),
+                      if (isExpanded)
+                        ListTile(
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -2),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 2.0, vertical: 0.0),
+                          leading:
+                              const Icon(Icons.format_list_bulleted_outlined),
+                          title: Row(
+                            children: [
+                              const Text('Outline'),
+                              Badge(
+                                alignment: Alignment.topLeft,
+                                label: const Text('coming soon'),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                textColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                              )
+                            ],
+                          ),
                         ),
                     ],
                   ),

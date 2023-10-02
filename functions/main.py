@@ -7,8 +7,11 @@ from firebase_functions import https_fn, storage_fn, options
 
 from batch_annotate import batch_annotate
 from check_answer_free_text import check_answer_free_text
+from generate_summary import generate_summary
 from process_annotations import process_annotations
 from generate_quiz import generate_quiz
+
+# deprecated
 from summarize import summarize
 
 
@@ -53,10 +56,17 @@ def generate_quiz_fn(req: https_fn.CallableRequest) -> Any:
     return generate_quiz(topic_id)
 
 
+# deprecated
 @https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
 def summarize_fn(req: https_fn.CallableRequest) -> Any:
     topic_id = req.data["topicId"]
     return summarize(topic_id)
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+def generate_summary_fn(req: https_fn.CallableRequest) -> Any:
+    topic_id = req.data["topicId"]
+    return generate_summary(topic_id)
 
 
 @https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
