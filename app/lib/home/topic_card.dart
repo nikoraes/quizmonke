@@ -270,6 +270,7 @@ class _TopicCardState extends State<TopicCard>
     return Card(
       margin: const EdgeInsets.all(5.0),
       child: InkWell(
+        customBorder: Theme.of(context).cardTheme.shape,
         onTap: () {
           toggleExpansion();
         },
