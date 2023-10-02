@@ -17,12 +17,11 @@ import 'package:quizmonke/summary/summary_screen.dart';
 import 'config.dart';
 
 final actionCodeSettings = ActionCodeSettings(
-  url: 'https://schoolscan-4c8d8.firebaseapp.com',
+  url: 'https://schoolscan-4c8d8.firebaseapp.com/__/auth/action',
   handleCodeInApp: true,
   androidMinimumVersion: '1',
   androidPackageName: 'com.raes.quizmonke',
   iOSBundleId: 'com.raes.quizmonke',
-  dynamicLinkDomain: 'quizmonke.page.link',
 );
 
 final emailLinkProviderConfig = EmailLinkAuthProvider(
