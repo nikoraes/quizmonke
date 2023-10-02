@@ -22,6 +22,7 @@ final actionCodeSettings = ActionCodeSettings(
   androidMinimumVersion: '1',
   androidPackageName: 'com.raes.quizmonke',
   iOSBundleId: 'com.raes.quizmonke',
+  dynamicLinkDomain: 'quizmonke.page.link',
 );
 
 final emailLinkProviderConfig = EmailLinkAuthProvider(
