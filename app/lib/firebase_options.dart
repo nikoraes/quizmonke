@@ -23,9 +23,15 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -55,27 +61,9 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDd7qzOMItFNRhqXtb0kvR6eRCRgh8THJE',
-    appId: '1:232118707051:android:e67d6f2d665164447aa22e',
+    appId: '1:232118707051:android:81e87b1e525bd48e7aa22e',
     messagingSenderId: '232118707051',
     projectId: 'schoolscan-4c8d8',
     storageBucket: 'schoolscan-4c8d8.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBjITqNBVZWRZQfI3GkQ8flWFakWIgHYO8',
-    appId: '1:232118707051:ios:32abdae9a45ea5c37aa22e',
-    messagingSenderId: '232118707051',
-    projectId: 'schoolscan-4c8d8',
-    storageBucket: 'schoolscan-4c8d8.appspot.com',
-    iosBundleId: 'com.example.quizmonke',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBjITqNBVZWRZQfI3GkQ8flWFakWIgHYO8',
-    appId: '1:232118707051:ios:242b873b69619d5d7aa22e',
-    messagingSenderId: '232118707051',
-    projectId: 'schoolscan-4c8d8',
-    storageBucket: 'schoolscan-4c8d8.appspot.com',
-    iosBundleId: 'com.example.quizmonke.RunnerTests',
   );
 }
