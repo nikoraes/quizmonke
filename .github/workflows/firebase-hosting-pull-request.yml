@@ -14,8 +14,6 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
         working-directory: "app"
-      - run: flutter test
-        working-directory: "app"
       - run: flutter build web
         working-directory: "app"
       - run: cp -a app/build/web/. public

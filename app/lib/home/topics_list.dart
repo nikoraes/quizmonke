@@ -11,12 +11,21 @@ class TopicsList extends StatefulWidget {
 }
 
 class TopicsListState extends State<TopicsList> {
-  final Stream<QuerySnapshot> _topicsStream = FirebaseFirestore.instance
-      .collection('topics')
-      .where('roles.${FirebaseAuth.instance.currentUser?.uid}',
-          whereIn: ["reader", "owner"])
-      .orderBy("timestamp", descending: true)
-      .snapshots();
+  late Stream<QuerySnapshot> _topicsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeStream();
+  }
+
+  void _initializeStream() {
+    _topicsStream = FirebaseFirestore.instance.collection('topics').where(
+            'roles.${FirebaseAuth.instance.currentUser?.uid}',
+            whereIn: ["reader", "owner"])
+        // .orderBy("timestamp", descending: true)
+        .snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +38,11 @@ class TopicsListState extends State<TopicsList> {
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text("Loading");
+        }
+
+        if (snapshot.data!.docs.isEmpty) {
+          return const Text(
+              "No topics yet! Get started by scanning some texts.");
         }
 
         return ListView(
