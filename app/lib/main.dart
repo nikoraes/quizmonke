@@ -16,7 +16,7 @@ import 'package:quizmonke/summary/summary_screen.dart';
 
 import 'config.dart';
 
-final actionCodeSettings = ActionCodeSettings(
+/* final actionCodeSettings = ActionCodeSettings(
   url: 'https://schoolscan-4c8d8.firebaseapp.com',
   handleCodeInApp: true,
   androidMinimumVersion: '1',
@@ -27,17 +27,7 @@ final actionCodeSettings = ActionCodeSettings(
 final emailLinkProviderConfig = EmailLinkAuthProvider(
   actionCodeSettings: actionCodeSettings,
 );
-
-class FirebaseAuthMethods {
-  final FirebaseAuth _auth;
-  FirebaseAuthMethods(this._auth);
-  // GET USER DATA
-  // using null check operator since this method should be called only
-  // when the user is logged in
-  User get user => _auth.currentUser!;
-  // STATE PERSISTENCE STREAM
-  Stream<User?> get authState => FirebaseAuth.instance.authStateChanges();
-}
+*/
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
