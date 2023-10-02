@@ -7,31 +7,46 @@ import 'package:quizmonke/home/topics_list.dart';
 import 'package:quizmonke/multicamera/camera_file.dart';
 import 'package:quizmonke/multicamera/multiple_image_camera.dart';
 
-class MyHomePage extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   static String routeName = '/';
-  const MyHomePage({super.key});
+  const HomeScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        // User is signed out, navigate to '/sign-in'
+        Navigator.pushReplacementNamed(context, '/sign-in');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.background,
+          leadingWidth: 48,
+          leading: const CircleAvatar(
+            backgroundImage: AssetImage('assets/logo.png'),
+          ),
           title: const Text('QuizMonke'),
           actions: const <Widget>[HomeAppBarMenu()]),
       body: const TopicsList(),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           MultipleImageCamera.capture(context: context).then((imgs) {
             onImagesCaptured(imgs);
           });
         },
-        label: const Text('New'),
-        icon: const Icon(Icons.add),
+        child: const Icon(Icons.add_a_photo_outlined),
       ),
     );
   }
@@ -59,13 +74,11 @@ class HomeAppBarMenu extends StatelessWidget {
       },
       menuChildren: [
         MenuItemButton(
-          child: const Text('Log out'),
+          child: const Text('Account'),
           onPressed: () async {
-            await FirebaseAuth.instance.signOut();
+            Navigator.pushNamed(context, '/profile');
+            // await FirebaseAuth.instance.signOut();
           },
-        ),
-        const MenuItemButton(
-          child: Text('Delete account'),
         ),
       ],
     );
