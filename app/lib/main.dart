@@ -233,7 +233,7 @@ class App extends StatelessWidget {
           return EmailVerificationScreen(
             headerBuilder: headerIcon(Icons.verified),
             sideBuilder: sideIcon(Icons.verified),
-            actionCodeSettings: actionCodeSettings,
+            // actionCodeSettings: actionCodeSettings,
             actions: [
               EmailVerifiedAction(() {
                 Navigator.pushNamedAndRemoveUntil(
@@ -264,7 +264,7 @@ class App extends StatelessWidget {
                 Navigator.pushReplacementNamed(context, '/sign-in');
               }),
             ],
-            actionCodeSettings: actionCodeSettings,
+            // actionCodeSettings: actionCodeSettings,
           );
         },
       },
