@@ -323,7 +323,7 @@ class _TopicCardState extends State<TopicCard>
                                 ),
                           title: Row(
                             children: [
-                              const Text('Summary'),
+                              const Text('Summary '),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label: const Text('preview'),
@@ -338,17 +338,16 @@ class _TopicCardState extends State<TopicCard>
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
-                      if (isExpanded)
-                        ListTile(
+                      /* if (isExpanded)
+                        const ListTile(
                           dense: true,
-                          visualDensity: const VisualDensity(vertical: -2),
-                          contentPadding: const EdgeInsets.symmetric(
+                          visualDensity: VisualDensity(vertical: -2),
+                          contentPadding: EdgeInsets.symmetric(
                               horizontal: 2.0, vertical: 0.0),
-                          leading:
-                              const Icon(Icons.format_list_bulleted_outlined),
+                          leading: Icon(Icons.format_list_bulleted_outlined),
                           title: Row(
                             children: [
-                              const Text('Outline'),
+                              Text('Outline'),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label: const Text('coming soon'),
@@ -359,7 +358,7 @@ class _TopicCardState extends State<TopicCard>
                               )
                             ],
                           ),
-                        ),
+                        ), */
                     ],
                   ),
                 ),
