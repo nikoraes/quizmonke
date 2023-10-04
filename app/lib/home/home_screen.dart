@@ -34,9 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.background,
           leadingWidth: 48,
-          leading: const CircleAvatar(
-            backgroundImage: AssetImage('assets/logo.png'),
-          ),
+          leading: Image.asset('assets/logo.png'),
           title: const Text('QuizMonke'),
           actions: const <Widget>[HomeAppBarMenu()]),
       body: const TopicsList(),
@@ -86,6 +84,8 @@ class HomeAppBarMenu extends StatelessWidget {
 }
 
 Future<void> onImagesCaptured(List<MediaModel> images) async {
+  if (images.isEmpty) return;
+
   final newTopic = {
     "extractStatus": "uploading",
     "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"},

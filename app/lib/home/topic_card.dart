@@ -28,6 +28,8 @@ Future<void> deleteTopic(String topicId) async {
 }
 
 Future<void> generateQuiz(String topicId) async {
+  // TODO: Set to generating immediately, because function cold start now makes this take a while
+  // then try catch and do something
   final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
       .httpsCallable('generate_quiz_fn')
       .call({"topicId": topicId});
@@ -36,14 +38,24 @@ Future<void> generateQuiz(String topicId) async {
 }
 
 Future<void> generateSummary(String topicId) async {
+  // TODO: Set to generating immediately, because function cold start now makes this take a while
+  // then try catch and do something
   final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
-      .httpsCallable('summarize_fn')
+      .httpsCallable('generate_summary_fn')
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
 }
 
-// TODO: https://stackoverflow.com/questions/56273062/flutter-collapsible-expansible-card
+Future<void> generateOutline(String topicId) async {
+  // TODO: Set to generating immediately, because function cold start now makes this take a while
+  // then try catch and do something
+  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
+      .httpsCallable('generate_outline_fn')
+      .call({"topicId": topicId});
+  final response = result.data as Map<String, dynamic>;
+  print("Response: $response");
+}
 
 class TopicCard extends StatefulWidget {
   final String id;
@@ -51,20 +63,25 @@ class TopicCard extends StatefulWidget {
   final String? description;
   final String? status;
   final String? summary;
+  final String? outline;
   final String? extractStatus;
   final String? quizStatus;
   final String? summaryStatus;
+  final String? outlineStatus;
 
-  const TopicCard(
-      {super.key,
-      required this.id,
-      this.name,
-      this.description,
-      this.summary,
-      this.status,
-      this.extractStatus,
-      this.quizStatus,
-      this.summaryStatus});
+  const TopicCard({
+    super.key,
+    required this.id,
+    this.name,
+    this.description,
+    this.summary,
+    this.outline,
+    this.status,
+    this.extractStatus,
+    this.quizStatus,
+    this.summaryStatus,
+    this.outlineStatus,
+  });
   @override
   _TopicCardState createState() => _TopicCardState();
 }
@@ -98,16 +115,21 @@ class _TopicCardState extends State<TopicCard>
   Widget build(BuildContext context) {
     void openQuiz(String id) async {
       print("Card $id Clicked");
+      // Get all questions from store
       FirebaseFirestore.instance.collection("topics/$id/questions").get().then(
         (querySnapshot) {
           print("Successfully completed");
           for (var docSnapshot in querySnapshot.docs) {
             print('${docSnapshot.id} => ${docSnapshot.data()}');
           }
+          // Parse to QuestionItem
           List<QuestionItem> questions =
               querySnapshot.docs.map((querySnapshot) {
             return QuestionItem.fromFirestore(querySnapshot, null);
           }).toList();
+          // Shuffle questions
+          questions.shuffle();
+          // Send to quiz (TODO: avoid using named route)
           Navigator.pushNamed(context, QuizScreen.routeName,
               arguments: QuizArguments(id, "${widget.name}", questions));
         },
@@ -125,7 +147,7 @@ class _TopicCardState extends State<TopicCard>
         context: parentContext,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('Delete quiz!'),
+            title: const Text('Delete topic!'),
             content: const Text('Are you sure?'),
             actions: [
               TextButton(
@@ -177,6 +199,12 @@ class _TopicCardState extends State<TopicCard>
             },
           ),
           MenuItemButton(
+            child: const Text('Generate Summary'),
+            onPressed: () {
+              generateOutline(widget.id);
+            },
+          ),
+          MenuItemButton(
             child: const Text('Delete'),
             onPressed: () {
               showDeleteDialog(context, widget.id);
@@ -194,6 +222,7 @@ class _TopicCardState extends State<TopicCard>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
+              // TODO: progress indicator should have more padding
               if (widget.quizStatus != "done")
                 const SizedBox(
                   width: 20.0,
@@ -260,6 +289,7 @@ class _TopicCardState extends State<TopicCard>
     return Card(
       margin: const EdgeInsets.all(5.0),
       child: InkWell(
+        customBorder: Theme.of(context).cardTheme.shape,
         onTap: () {
           toggleExpansion();
         },
@@ -280,9 +310,10 @@ class _TopicCardState extends State<TopicCard>
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 0.0),
+                              horizontal: 2.0, vertical: 0.0),
                           leading: widget.quizStatus == "done"
                               ? const Icon(Icons.quiz_outlined)
+                              // TODO: show error icon if status is error
                               : const SizedBox(
                                   width: 20.0,
                                   height: 20.0,
@@ -300,9 +331,10 @@ class _TopicCardState extends State<TopicCard>
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 0.0),
+                              horizontal: 2.0, vertical: 0.0),
                           leading: widget.summaryStatus == "done"
                               ? const Icon(Icons.text_snippet_outlined)
+                              // TODO: show error icon if status is error
                               : const SizedBox(
                                   width: 20.0,
                                   height: 20.0,
@@ -325,6 +357,37 @@ class _TopicCardState extends State<TopicCard>
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
+                      if (isExpanded)
+                        ListTile(
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -2),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 2.0, vertical: 0.0),
+                          leading: widget.outlineStatus == "done"
+                              ? const Icon(Icons.format_list_bulleted_outlined)
+                              // TODO: show error icon if status is error
+                              : const SizedBox(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  child: CircularProgressIndicator(),
+                                ),
+                          title: Row(
+                            children: [
+                              const Text('Outline'),
+                              Badge(
+                                alignment: Alignment.topLeft,
+                                label: const Text('coming soon'),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                textColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                              )
+                            ],
+                          ),
+                          onTap: () {
+                            openSummary(widget.id, '${widget.outline}');
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -334,105 +397,6 @@ class _TopicCardState extends State<TopicCard>
         ),
       ),
     );
-
-    /* return Padding(
-      padding: const EdgeInsets.all(5),
-      child: Card(
-        child: InkWell(
-          onTap: () {
-            toggleExpansion();
-          },
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(10, 5, 5, 10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    if (widget.extractStatus != "done")
-                      const CircularProgressIndicator(),
-                    if (widget.name != null)
-                      Expanded(
-                        // Wrap the Text widget with Expanded
-                        child: Text(
-                          '${widget.name}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )
-                    else if (widget.extractStatus != "done")
-                      Expanded(
-                        // Wrap the Text widget with Expanded
-                        child: Text(
-                          "Loading",
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ),
-                    // Menu
-                    buildMenu()
-                  ],
-                ),
-                const SizedBox(height: 4),
-                if (widget.description != null)
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text('${widget.description}'),
-                  ),
-                /* Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(id),
-                ), */
-                const SizedBox(height: 20),
-                /* if (status != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('status: $status'),
-                  ),
-                if (extractStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('extraction: $extractStatus'),
-                  ),
-                if (summaryStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('summary: $summaryStatus'),
-                  ),
-                if (quizStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('quiz: $quizStatus'),
-                  ), */
-                if (widget.summary != null)
-                  ListTile(
-                    dense: true,
-                    leading: widget.summaryStatus == "done"
-                        ? const Icon(Icons.text_snippet_outlined)
-                        : const CircularProgressIndicator(),
-                    title: const Text('Summary'),
-                    onTap: () {
-                      openSummary(widget.id, '${widget.summary}');
-                    },
-                  ),
-                ListTile(
-                  dense: true,
-                  leading: widget.quizStatus == "done"
-                      ? const Icon(Icons.question_mark_outlined)
-                      : const CircularProgressIndicator(),
-                  title: const Text('Quiz'),
-                  onTap: () {
-                    openQuiz(widget.id);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ); */
   }
 
   @override

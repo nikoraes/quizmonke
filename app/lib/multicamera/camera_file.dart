@@ -45,7 +45,7 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
     });
   }
 
-  Widget _animatedButton() {
+  Widget _doneButton() {
     return Container(
       height: 70,
       width: 150,
@@ -184,21 +184,6 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
               scrollDirection: Axis.horizontal,
             ),
             Positioned(
-              right: MediaQuery.of(context).orientation == Orientation.portrait
-                  ? 340
-                  : null,
-              bottom: 0,
-              left: 0,
-              child: IconButton(
-                iconSize: 40,
-                icon: const Icon(
-                  Icons.cameraswitch_outlined,
-                  color: Colors.white,
-                ),
-                onPressed: _onCameraSwitch,
-              ),
-            ),
-            Positioned(
               left: MediaQuery.of(context).orientation == Orientation.portrait
                   ? 0
                   : null,
@@ -209,13 +194,17 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   SafeArea(
-                    child: FloatingActionButton(
-                      shape: const CircleBorder(),
-                      onPressed: () {
-                        _currIndex = _currIndex == 0 ? 1 : 0;
-                        takePicture();
-                      },
-                      child: const Icon(Icons.camera_alt_outlined),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FloatingActionButton(
+                        shape: const CircleBorder(),
+                        backgroundColor: Colors.white,
+                        onPressed: () {
+                          _currIndex = _currIndex == 0 ? 1 : 0;
+                          takePicture();
+                        },
+                        child: const Icon(Icons.camera_alt_outlined),
+                      ),
                     ),
                   ),
                 ],
@@ -225,28 +214,6 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
         ),
       ),
     );
-  }
-
-  Future<void> _onCameraSwitch() async {
-    final CameraDescription cameraDescription =
-        (_controller!.description == _cameras[0]) ? _cameras[1] : _cameras[0];
-    if (_controller != null) {
-      await _controller!.dispose();
-    }
-    _controller =
-        CameraController(cameraDescription, ResolutionPreset.ultraHigh);
-    _controller!.addListener(() {
-      if (mounted) setState(() {});
-      if (_controller!.value.hasError) {}
-    });
-
-    try {
-      await _controller!.initialize();
-      // ignore: empty_catches
-    } on CameraException {}
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   takePicture() async {
@@ -289,13 +256,14 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
                     for (int i = 0; i < imageFiles.length; i++) {
                       File file = File(imageFiles[i].path);
                       imageList.add(
-                          MediaModel.blob(file, "", file.readAsBytesSync()));
+                        MediaModel.blob(file, "", file.readAsBytesSync()),
+                      );
                     }
                     Navigator.pop(context, imageList);
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8.0),
-                    child: _animatedButton(),
+                    child: _doneButton(),
                   ))
               : const SizedBox()
         ],
@@ -305,6 +273,21 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
       backgroundColor: Theme.of(context).colorScheme.background,
       extendBody: true,
       body: _buildCameraPreview(),
+      /* floatingActionButton: imageFiles.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: () {
+                for (int i = 0; i < imageFiles.length; i++) {
+                  File file = File(imageFiles[i].path);
+                  imageList
+                      .add(MediaModel.blob(file, "", file.readAsBytesSync()));
+                }
+                Navigator.pop(context, imageList);
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: _doneButton(),
+              ))
+          : const SizedBox(), */
     );
   }
 
