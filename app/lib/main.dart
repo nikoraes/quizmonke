@@ -87,6 +87,7 @@ class App extends StatelessWidget {
 
     return MaterialApp(
       title: 'QuizMonke',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromRGBO(9, 9, 9, 1),
