@@ -47,7 +47,15 @@ Future<void> generateSummary(String topicId) async {
   print("Response: $response");
 }
 
-// TODO: https://stackoverflow.com/questions/56273062/flutter-collapsible-expansible-card
+Future<void> generateOutline(String topicId) async {
+  // TODO: Set to generating immediately, because function cold start now makes this take a while
+  // then try catch and do something
+  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
+      .httpsCallable('generate_outline_fn')
+      .call({"topicId": topicId});
+  final response = result.data as Map<String, dynamic>;
+  print("Response: $response");
+}
 
 class TopicCard extends StatefulWidget {
   final String id;
@@ -55,20 +63,25 @@ class TopicCard extends StatefulWidget {
   final String? description;
   final String? status;
   final String? summary;
+  final String? outline;
   final String? extractStatus;
   final String? quizStatus;
   final String? summaryStatus;
+  final String? outlineStatus;
 
-  const TopicCard(
-      {super.key,
-      required this.id,
-      this.name,
-      this.description,
-      this.summary,
-      this.status,
-      this.extractStatus,
-      this.quizStatus,
-      this.summaryStatus});
+  const TopicCard({
+    super.key,
+    required this.id,
+    this.name,
+    this.description,
+    this.summary,
+    this.outline,
+    this.status,
+    this.extractStatus,
+    this.quizStatus,
+    this.summaryStatus,
+    this.outlineStatus,
+  });
   @override
   _TopicCardState createState() => _TopicCardState();
 }
@@ -134,7 +147,7 @@ class _TopicCardState extends State<TopicCard>
         context: parentContext,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('Delete quiz!'),
+            title: const Text('Delete topic!'),
             content: const Text('Are you sure?'),
             actions: [
               TextButton(
@@ -183,6 +196,12 @@ class _TopicCardState extends State<TopicCard>
             child: const Text('Generate Summary'),
             onPressed: () {
               generateSummary(widget.id);
+            },
+          ),
+          MenuItemButton(
+            child: const Text('Generate Summary'),
+            onPressed: () {
+              generateOutline(widget.id);
             },
           ),
           MenuItemButton(
@@ -338,16 +357,23 @@ class _TopicCardState extends State<TopicCard>
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
-                      /* if (isExpanded)
-                        const ListTile(
+                      if (isExpanded)
+                        ListTile(
                           dense: true,
-                          visualDensity: VisualDensity(vertical: -2),
-                          contentPadding: EdgeInsets.symmetric(
+                          visualDensity: const VisualDensity(vertical: -2),
+                          contentPadding: const EdgeInsets.symmetric(
                               horizontal: 2.0, vertical: 0.0),
-                          leading: Icon(Icons.format_list_bulleted_outlined),
+                          leading: widget.outlineStatus == "done"
+                              ? const Icon(Icons.format_list_bulleted_outlined)
+                              // TODO: show error icon if status is error
+                              : const SizedBox(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  child: CircularProgressIndicator(),
+                                ),
                           title: Row(
                             children: [
-                              Text('Outline'),
+                              const Text('Outline'),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label: const Text('coming soon'),
@@ -358,7 +384,10 @@ class _TopicCardState extends State<TopicCard>
                               )
                             ],
                           ),
-                        ), */
+                          onTap: () {
+                            openSummary(widget.id, '${widget.outline}');
+                          },
+                        ),
                     ],
                   ),
                 ),

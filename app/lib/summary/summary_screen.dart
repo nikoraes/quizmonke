@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+// TODO: make this into a generic MarkDownScreen
+
 class SummaryArguments {
   final String topicId;
   final String topicName;
