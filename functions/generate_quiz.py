@@ -53,7 +53,7 @@ def generate_quiz(topic_id: str):
 
         template = """You are a world class algorithm for generating quizzes in a structured format.
 
-You will receive a piece of text and you will need to create a quiz based on that text (in the same language).
+You will receive a piece of text as INPUT and you will need to create a quiz based on that text (in the same language).
 The quiz you generate will have 5 question items and you can have 4 types of question items: 
     1.Multiple choice (multiple_choice): provide at least 3 choices per question and provide the correct answer (exact).
     2.Multiple choice with multiple answers (multiple_choice_multi): provide at least 3 choices per question and provide the correct answers, separated by commas (a potential correct value for answer could be 'foo,bar,test').
@@ -63,7 +63,7 @@ For each question, you also need to provide the correct answer. Make sure that t
 The question should be concise and clear. The question should not list possible choices.
 Questions, choices and answers should always be short and concise: answers should never be more than 3 words.
 
-The values of the name, description, questions, choices, answers should all be in the same language as the input text.
+The values of the name, description, questions, choices, answers should all be in the same language as the INPUT.
 Make sure that all output is in the same language as the input text (all field values).
 
 {format_instructions}
@@ -71,7 +71,7 @@ Make sure that all output is in the same language as the input text (all field v
 **INPUT:**
 "{input}"
 
-**JSON RESPONSE:**"""
+**JSON OUTPUT:**"""
 
         output_parser = PydanticOutputParser(pydantic_object=TopicQuestions)
         format_instructions = output_parser.get_format_instructions()

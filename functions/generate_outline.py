@@ -21,25 +21,34 @@ def generate_outline(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Generate a structured outline (markdown) for the provided input. Make sure that the generated outline is in the same language as the input text.
+        prompt_template = """Generate a structured outline (markdown) for the provided INPUT. 
+Make sure that the generated outline is in the same language as the INPUT.
 
-Here's a sample of part of a structured outline:
+Here's a sample of part of a structured OUTLINE:
 
 SAMPLE OUTLINE: "
 ## I. Astronaut's Perspective
+
    A. Embracing the Unknown
+
       1. Facing Fear
          - Astronaut's initial apprehensions
          - **Overcoming Fear:** Emphasize the courage needed
+
       2. View from Space
          - Describe the awe-inspiring experience
          - _Unforgettable Moment:_ Highlight a specific view
+
    B. Life in Zero Gravity
+
       1. Adaptation
          - Discuss challenges of living without gravity
          - `Scientific Insight:` Brief explanation of zero gravity effects
+
 ## II. Celestial Phenomena
+
    A. Solar System Exploration
+
       1. Martian Landscape
          - Overview of Mars exploration"
 

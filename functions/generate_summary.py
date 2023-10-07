@@ -21,7 +21,8 @@ def generate_summary(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Generate a summary of the provided input text. The summary should help to memorize the content of the provided input text. Use multiple paragraphs to improve readability. The generated summary must be in the same language as the input text!
+        prompt_template = """Summarize the provided INPUT.
+The generated summary must be in the same language as the INPUT!
 
 INPUT: "{text}"
 
@@ -36,7 +37,7 @@ SUMMARY:"""
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
-            model_name="text-bison",
+            model_name="text-bison@001",
             candidate_count=1,
             max_output_tokens=1024,
             temperature=0.2,
