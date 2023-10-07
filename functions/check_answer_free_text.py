@@ -50,6 +50,6 @@ def check_answer_free_text(
 
     res = llm(final_prompt)
 
-    logging.debug(res)
+    print(res)
 
     return res

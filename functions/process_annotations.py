@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import logging
 import pathlib
@@ -25,7 +26,7 @@ def process_annotations(
     blob = bucket.blob(str(file_path))
     annotation_responses = json.loads(blob.download_as_string())
 
-    logging.debug(f"process_annotations - {annotation_responses}")
+    print(f"process_annotations - {annotation_responses}")
 
     for res in annotation_responses["responses"]:
         # store in db
@@ -37,7 +38,7 @@ def process_annotations(
         )
 
     firestore_client.collection("topics").document(topic_id).update(
-        {"extractStatus": "done"}
+        {"timestamp": firestore.SERVER_TIMESTAMP, "extractStatus": "done"}
     )
 
     return topic_id

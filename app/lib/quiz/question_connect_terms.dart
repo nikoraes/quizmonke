@@ -1,6 +1,6 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
 
@@ -60,14 +60,14 @@ class _QuestionConnectTermsState extends State<QuestionConnectTerms> {
                       : QuestionResult.wrong);
                 }
               : null,
-          child: const Text('Check Answer'),
+          child: Text(AppLocalizations.of(context)!.checkAnswer),
         ),
         // Skip Button
         TextButton(
           onPressed: () {
             widget.onAnswerChecked(QuestionResult.skipped);
           },
-          child: const Text('Skip'),
+          child: Text(AppLocalizations.of(context)!.skip),
         ),
       ],
     );

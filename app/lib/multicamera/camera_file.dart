@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import "package:flutter/material.dart";
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import "package:camera/camera.dart";
 import 'package:flutter/services.dart';
 import 'package:quizmonke/multicamera/image_preview.dart';
@@ -53,10 +54,10 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
         color: Colors.white38,
         borderRadius: BorderRadius.circular(100.0),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
-          'Done',
-          style: TextStyle(
+          AppLocalizations.of(context)!.done,
+          style: const TextStyle(
               fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),

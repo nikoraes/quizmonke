@@ -24,13 +24,13 @@ def batch_annotate(req: https_fn.CallableRequest) -> Any:
 
     vision_client = vision.ImageAnnotatorClient()
 
-    logging.debug(f"{requests} - {output_config}")
+    print(f"{requests} - {output_config}")
 
     operation = vision_client.async_batch_annotate_images(
         requests=requests, output_config=output_config
     )
 
-    logging.info("batch_annotate - Waiting for operation to complete...")
+    print("batch_annotate - Waiting for operation to complete...")
     operation.result(60)
 
     return {"done": True}

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/home/topic_card.dart';
 
 class TopicsList extends StatefulWidget {
@@ -33,34 +34,52 @@ class TopicsListState extends State<TopicsList> {
       stream: _topicsStream,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasError) {
-          return const Text('Something went wrong');
+          return Center(
+            child: Text(
+              AppLocalizations.of(context)!.oops,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+          );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading");
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (snapshot.data!.docs.isEmpty) {
-          return const Text(
-              "No topics yet! Get started by scanning some texts.");
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.welcomeText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.noTopicsText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          );
         }
 
         return ListView(
           children: snapshot.data!.docs
-              .map((DocumentSnapshot document) {
-                Map<String, dynamic> data =
-                    document.data()! as Map<String, dynamic>;
-                String id = document.id;
-                return TopicCard(
-                  id: id,
-                  name: data['name'],
-                  description: data['description'],
-                  status: data['status'],
-                  extractStatus: data['extractStatus'],
-                  quizStatus: data['quizStatus'],
-                  summaryStatus: data['summaryStatus'],
-                  summary: data['summary'],
-                );
+              .map((DocumentSnapshot snapshot) {
+                return TopicCard.fromFirestore(
+                    snapshot as DocumentSnapshot<Map<String, dynamic>>, null);
               })
               .toList()
               .cast(),

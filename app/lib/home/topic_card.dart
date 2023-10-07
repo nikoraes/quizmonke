@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
-import 'package:quizmonke/summary/summary_screen.dart';
+import 'package:quizmonke/utils/markdown_screen.dart';
 
 Future<void> deleteTopic(String topicId) async {
   final batch = FirebaseFirestore.instance.batch();
@@ -25,6 +27,9 @@ Future<void> deleteTopic(String topicId) async {
   var topicRef = FirebaseFirestore.instance.collection("topics").doc(topicId);
   batch.delete(topicRef);
   await batch.commit();
+  FirebaseAnalytics.instance.logEvent(name: "delete_topic", parameters: {
+    "topic_id": topicId,
+  });
 }
 
 Future<void> generateQuiz(String topicId) async {
@@ -35,6 +40,10 @@ Future<void> generateQuiz(String topicId) async {
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
+  FirebaseAnalytics.instance.logEvent(name: "generate_quiz", parameters: {
+    "topic_id": topicId,
+    "response": response,
+  });
 }
 
 Future<void> generateSummary(String topicId) async {
@@ -45,6 +54,10 @@ Future<void> generateSummary(String topicId) async {
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
+  FirebaseAnalytics.instance.logEvent(name: "generate_summary", parameters: {
+    "topic_id": topicId,
+    "response": response,
+  });
 }
 
 Future<void> generateOutline(String topicId) async {
@@ -55,12 +68,18 @@ Future<void> generateOutline(String topicId) async {
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
+  FirebaseAnalytics.instance.logEvent(name: "generate_outline", parameters: {
+    "topic_id": topicId,
+    "response": response,
+  });
 }
 
+// TODO: create Firestore converters
 class TopicCard extends StatefulWidget {
   final String id;
   final String? name;
   final String? description;
+  final List<String>? tags;
   final String? status;
   final String? summary;
   final String? outline;
@@ -74,6 +93,7 @@ class TopicCard extends StatefulWidget {
     required this.id,
     this.name,
     this.description,
+    this.tags,
     this.summary,
     this.outline,
     this.status,
@@ -82,6 +102,28 @@ class TopicCard extends StatefulWidget {
     this.summaryStatus,
     this.outlineStatus,
   });
+
+  factory TopicCard.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    String id = snapshot.id;
+    return TopicCard(
+      id: id,
+      name: data?['name'],
+      description: data?['description'],
+      status: data?['status'],
+      tags: data?['tags'] is Iterable ? List.from(data?['tags']) : null,
+      extractStatus: data?['extractStatus'],
+      quizStatus: data?['quizStatus'],
+      summaryStatus: data?['summaryStatus'],
+      summary: data?['summary'],
+      outlineStatus: data?['outlineStatus'],
+      outline: data?['outline'],
+    );
+  }
+
   @override
   _TopicCardState createState() => _TopicCardState();
 }
@@ -114,7 +156,6 @@ class _TopicCardState extends State<TopicCard>
   @override
   Widget build(BuildContext context) {
     void openQuiz(String id) async {
-      print("Card $id Clicked");
       // Get all questions from store
       FirebaseFirestore.instance.collection("topics/$id/questions").get().then(
         (querySnapshot) {
@@ -122,24 +163,63 @@ class _TopicCardState extends State<TopicCard>
           for (var docSnapshot in querySnapshot.docs) {
             print('${docSnapshot.id} => ${docSnapshot.data()}');
           }
+          List<QuestionItem> questions = <QuestionItem>[];
+          for (var doc in querySnapshot.docs) {
+            try {
+              var q = QuestionItem.fromFirestore(doc, null);
+              questions.add(q);
+            } catch (e) {
+              print("Error processing: $e");
+            }
+          }
           // Parse to QuestionItem
-          List<QuestionItem> questions =
+          /* List<QuestionItem> questions =
               querySnapshot.docs.map((querySnapshot) {
             return QuestionItem.fromFirestore(querySnapshot, null);
-          }).toList();
+          }).toList(); */
           // Shuffle questions
           questions.shuffle();
           // Send to quiz (TODO: avoid using named route)
           Navigator.pushNamed(context, QuizScreen.routeName,
               arguments: QuizArguments(id, "${widget.name}", questions));
+          FirebaseAnalytics.instance.logEvent(name: "open_quiz", parameters: {
+            "topic_id": id,
+            "questions_firebase_length": querySnapshot.docs.length,
+            "questions_length": questions.length,
+          });
         },
         onError: (e) => print("Error completing: $e"),
       );
     }
 
     void openSummary(String id, String summary) {
-      Navigator.pushNamed(context, SummaryScreen.routeName,
-          arguments: SummaryArguments(id, "${widget.name}", summary));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MarkdownScreen(
+            title: '${widget.name}',
+            markdown: summary,
+          ),
+        ),
+      );
+      FirebaseAnalytics.instance.logEvent(name: "open_summary", parameters: {
+        "topic_id": id,
+      });
+    }
+
+    void openOutline(String id, String outline) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MarkdownScreen(
+            title: '${widget.name}',
+            markdown: outline,
+          ),
+        ),
+      );
+      FirebaseAnalytics.instance.logEvent(name: "open_outline", parameters: {
+        "topic_id": id,
+      });
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
@@ -147,21 +227,21 @@ class _TopicCardState extends State<TopicCard>
         context: parentContext,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('Delete topic!'),
-            content: const Text('Are you sure?'),
+            title: Text(AppLocalizations.of(context)!.deleteTopic),
+            content: Text(AppLocalizations.of(context)!.areYouSure),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(parentContext);
                 },
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () {
                   deleteTopic(topicId);
                   Navigator.pop(parentContext);
                 },
-                child: const Text('Delete'),
+                child: Text(AppLocalizations.of(context)!.delete),
               ),
             ],
           );
@@ -182,30 +262,29 @@ class _TopicCardState extends State<TopicCard>
               }
             },
             icon: const Icon(Icons.more_vert),
-            tooltip: 'Show menu',
           );
         },
         menuChildren: [
           MenuItemButton(
-            child: const Text('Generate Quiz'),
+            child: Text(AppLocalizations.of(context)!.generateQuiz),
             onPressed: () {
               generateQuiz(widget.id);
             },
           ),
           MenuItemButton(
-            child: const Text('Generate Summary'),
+            child: Text(AppLocalizations.of(context)!.generateSummary),
             onPressed: () {
               generateSummary(widget.id);
             },
           ),
           MenuItemButton(
-            child: const Text('Generate Summary'),
+            child: Text(AppLocalizations.of(context)!.generateOutline),
             onPressed: () {
               generateOutline(widget.id);
             },
           ),
           MenuItemButton(
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
             onPressed: () {
               showDeleteDialog(context, widget.id);
             },
@@ -222,31 +301,15 @@ class _TopicCardState extends State<TopicCard>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              // TODO: progress indicator should have more padding
-              if (widget.quizStatus != "done")
-                const SizedBox(
-                  width: 20.0,
-                  height: 20.0,
-                  child: CircularProgressIndicator(),
+              Expanded(
+                // Wrap the Text widget with Expanded
+                child: Text(
+                  widget.name ?? AppLocalizations.of(context)!.loading,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              if (widget.name != null)
-                Expanded(
-                  // Wrap the Text widget with Expanded
-                  child: Text(
-                    '${widget.name}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              else
-                Expanded(
-                  // Wrap the Text widget with Expanded
-                  child: Text(
-                    "Loading",
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
+              ),
               // Menu
               buildMenu()
             ],
@@ -257,31 +320,7 @@ class _TopicCardState extends State<TopicCard>
               alignment: Alignment.topLeft,
               child: Text('${widget.description}'),
             ),
-          /* Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(id),
-                ), */
-          const SizedBox(height: 20),
-          /* if (status != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('status: $status'),
-                  ),
-                if (extractStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('extraction: $extractStatus'),
-                  ),
-                if (summaryStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('summary: $summaryStatus'),
-                  ),
-                if (quizStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('quiz: $quizStatus'),
-                  ), */
+          const SizedBox(height: 16),
         ],
       );
     }
@@ -305,7 +344,22 @@ class _TopicCardState extends State<TopicCard>
                       .drive(CurveTween(curve: Curves.easeInOut)),
                   child: Column(
                     children: [
-                      if (isExpanded)
+                      // List of chips with tags
+                      if (isExpanded && widget.tags != null)
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Wrap(
+                            spacing:
+                                4.0, // Adjust the spacing between chips as needed
+                            runSpacing: -8.0,
+                            children: widget.tags!
+                                .map((tag) => Chip(
+                                    label: Text(tag),
+                                    padding: const EdgeInsets.all(0)))
+                                .toList(),
+                          ),
+                        ),
+                      if (isExpanded && widget.quizStatus != null)
                         ListTile(
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
@@ -326,7 +380,7 @@ class _TopicCardState extends State<TopicCard>
                             openQuiz(widget.id);
                           },
                         ),
-                      if (isExpanded)
+                      if (isExpanded && widget.summaryStatus != null)
                         ListTile(
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
@@ -354,10 +408,11 @@ class _TopicCardState extends State<TopicCard>
                             ],
                           ),
                           onTap: () {
+                            if (widget.summary == null) return;
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
-                      if (isExpanded)
+                      if (isExpanded && widget.outlineStatus != null)
                         ListTile(
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
@@ -373,10 +428,10 @@ class _TopicCardState extends State<TopicCard>
                                 ),
                           title: Row(
                             children: [
-                              const Text('Outline'),
+                              const Text('Outline '),
                               Badge(
                                 alignment: Alignment.topLeft,
-                                label: const Text('coming soon'),
+                                label: const Text('preview'),
                                 backgroundColor:
                                     Theme.of(context).colorScheme.primary,
                                 textColor:
@@ -385,6 +440,7 @@ class _TopicCardState extends State<TopicCard>
                             ],
                           ),
                           onTap: () {
+                            if (widget.outline == null) return;
                             openSummary(widget.id, '${widget.outline}');
                           },
                         ),

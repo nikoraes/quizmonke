@@ -14,16 +14,13 @@ from generate_summary import generate_summary
 from process_annotations import process_annotations
 from generate_quiz import generate_quiz
 
-# deprecated
-from summarize import summarize
-
 
 initialize_app()
 
 
 @https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
 def batch_annotate_fn(req: https_fn.CallableRequest) -> Any:
-    logging.info(f"batch_annotate_fn: {req.data}")
+    print(f"batch_annotate_fn: {req.data}")
     return batch_annotate(req)
 
 
@@ -36,43 +33,35 @@ def process_annotations_fn(
     topic_id = process_annotations(event)
     if topic_id == None:
         return
-    logging.info(f"process_annotations_fn - Annotations processed: {topic_id}")
+    print(f"process_annotations_fn - Annotations processed: {topic_id}")
 
     def topic_details_thread():
         topic_details_res = generate_topic_details(topic_id)
         if topic_details_res["done"]:
-            logging.info(
-                f"process_annotations_fn - Topic details generated: {topic_id}"
-            )
+            print(f"process_annotations_fn - Topic details generated: {topic_id}")
         else:
-            logging.error(f"process_annotations_fn - Topic details failed: {topic_id}")
+            print(f"process_annotations_fn - Topic details failed: {topic_id}")
 
     def questions_thread():
         quiz_res = generate_quiz(topic_id)
         if quiz_res["done"]:
-            logging.info(f"process_annotations_fn - Quiz generated: {topic_id}")
+            print(f"process_annotations_fn - Quiz generated: {topic_id}")
         else:
-            logging.error(
-                f"process_annotations_fn - Quiz generation failed: {topic_id}"
-            )
+            print(f"process_annotations_fn - Quiz generation failed: {topic_id}")
 
     def summary_thread():
         summ_res = generate_summary(topic_id)
         if summ_res["done"]:
-            logging.info(f"process_annotations_fn - Summary generated: {topic_id}")
+            print(f"process_annotations_fn - Summary generated: {topic_id}")
         else:
-            logging.error(
-                f"process_annotations_fn - Summary generation failed: {topic_id}"
-            )
+            print(f"process_annotations_fn - Summary generation failed: {topic_id}")
 
     def outline_thread():
         outline_res = generate_outline(topic_id)
         if outline_res["done"]:
-            logging.info(f"process_annotations_fn - Outline generated: {topic_id}")
+            print(f"process_annotations_fn - Outline generated: {topic_id}")
         else:
-            logging.error(
-                f"process_annotations_fn - Outline generation failed: {topic_id}"
-            )
+            print(f"process_annotations_fn - Outline generation failed: {topic_id}")
 
     threads: List[Thread] = []
     # create the threads

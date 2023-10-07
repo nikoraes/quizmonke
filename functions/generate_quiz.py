@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 from typing import List, Optional
 from firebase_admin import firestore
@@ -79,7 +80,7 @@ Make sure to only answer with a valid JSON in the correct format.
             template=template,
         )
         final_prompt = prompt.format(input=fulltext)
-        logging.debug(f"generate_quiz - final prompt: {final_prompt}")
+        print(f"generate_quiz - final prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -93,31 +94,32 @@ Make sure to only answer with a valid JSON in the correct format.
 
         res_text = llm(final_prompt)
 
-        logging.debug(f"generate_quiz - res_text: {res_text}")
+        print(f"generate_quiz - res_text: {res_text}")
 
         res = output_parser.parse(res_text)
 
-        logging.debug(f"generate_quiz - res: {res}")
+        print(f"generate_quiz - res: {res}")
 
         for question in res.questions:
-            logging.debug(question)
+            print(question)
             firestore_client.collection(f"topics/{topic_id}/questions").add(
                 dict(question)
             )
 
         firestore_client.collection("topics").document(topic_id).update(
             {
+                "timestamp": firestore.SERVER_TIMESTAMP,
                 "quizStatus": "done",
             }
         )
 
-        logging.debug("generate_quiz - done")
+        print("generate_quiz - done")
 
         return {"done": True}
 
     except Exception as error:
         error_name = type(error).__name__
-        logging.error(
+        print(
             f"generate_quiz - Error while generating quiz: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
