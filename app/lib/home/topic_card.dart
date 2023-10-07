@@ -7,9 +7,6 @@ import 'package:quizmonke/quiz/quiz_screen.dart';
 import 'package:quizmonke/summary/summary_screen.dart';
 
 Future<void> deleteTopic(String topicId) async {
-  FirebaseAnalytics.instance.logEvent(name: "delete_topic", parameters: {
-    "topic_id": topicId,
-  });
   final batch = FirebaseFirestore.instance.batch();
   // questions
   var questions = await FirebaseFirestore.instance
@@ -29,6 +26,9 @@ Future<void> deleteTopic(String topicId) async {
   var topicRef = FirebaseFirestore.instance.collection("topics").doc(topicId);
   batch.delete(topicRef);
   await batch.commit();
+  FirebaseAnalytics.instance.logEvent(name: "delete_topic", parameters: {
+    "topic_id": topicId,
+  });
 }
 
 Future<void> generateQuiz(String topicId) async {
@@ -39,6 +39,10 @@ Future<void> generateQuiz(String topicId) async {
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
+  FirebaseAnalytics.instance.logEvent(name: "generate_quiz", parameters: {
+    "topic_id": topicId,
+    "response": response,
+  });
 }
 
 Future<void> generateSummary(String topicId) async {
@@ -49,6 +53,10 @@ Future<void> generateSummary(String topicId) async {
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
+  FirebaseAnalytics.instance.logEvent(name: "generate_summary", parameters: {
+    "topic_id": topicId,
+    "response": response,
+  });
 }
 
 Future<void> generateOutline(String topicId) async {
@@ -59,6 +67,10 @@ Future<void> generateOutline(String topicId) async {
       .call({"topicId": topicId});
   final response = result.data as Map<String, dynamic>;
   print("Response: $response");
+  FirebaseAnalytics.instance.logEvent(name: "generate_outline", parameters: {
+    "topic_id": topicId,
+    "response": response,
+  });
 }
 
 // TODO: create Firestore converters
@@ -147,6 +159,11 @@ class _TopicCardState extends State<TopicCard>
           // Send to quiz (TODO: avoid using named route)
           Navigator.pushNamed(context, QuizScreen.routeName,
               arguments: QuizArguments(id, "${widget.name}", questions));
+          FirebaseAnalytics.instance.logEvent(name: "open_quiz", parameters: {
+            "topic_id": id,
+            "questions_firebase_length": querySnapshot.docs.length,
+            "questions_length": questions.length,
+          });
         },
         onError: (e) => print("Error completing: $e"),
       );
@@ -156,11 +173,17 @@ class _TopicCardState extends State<TopicCard>
       // TODO: make generic markdown screen
       Navigator.pushNamed(context, SummaryScreen.routeName,
           arguments: SummaryArguments(id, "${widget.name}", summary));
+      FirebaseAnalytics.instance.logEvent(name: "open_summary", parameters: {
+        "topic_id": id,
+      });
     }
 
     void openOutline(String id, String outline) {
       Navigator.pushNamed(context, SummaryScreen.routeName,
           arguments: SummaryArguments(id, "${widget.name}", outline));
+      FirebaseAnalytics.instance.logEvent(name: "open_outline", parameters: {
+        "topic_id": id,
+      });
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
