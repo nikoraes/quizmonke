@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
 
@@ -65,14 +65,14 @@ class _QuestionMultipleChoiceState extends State<QuestionMultipleChoice> {
                       : QuestionResult.wrong);
                 }
               : null,
-          child: const Text('Check Answer'),
+          child: Text(AppLocalizations.of(context)!.checkAnswer),
         ),
         // Skip Button
         TextButton(
           onPressed: () {
             widget.onAnswerChecked(QuestionResult.skipped);
           },
-          child: const Text('Skip'),
+          child: Text(AppLocalizations.of(context)!.skip),
         ),
       ],
     );

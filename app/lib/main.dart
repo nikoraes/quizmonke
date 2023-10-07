@@ -4,32 +4,21 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quizmonke/auth/decorations.dart';
 import 'package:quizmonke/auth/policy_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home/home_screen.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
-import 'package:quizmonke/summary/summary_screen.dart';
+import 'package:quizmonke/utils/markdown_screen.dart';
 
 import 'config.dart';
-
-/* final actionCodeSettings = ActionCodeSettings(
-  url: 'https://schoolscan-4c8d8.firebaseapp.com',
-  handleCodeInApp: true,
-  androidMinimumVersion: '1',
-  androidPackageName: 'com.raes.quizmonke',
-  iOSBundleId: 'com.raes.quizmonke',
-);
-
-final emailLinkProviderConfig = EmailLinkAuthProvider(
-  actionCodeSettings: actionCodeSettings,
-);
-*/
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
@@ -96,6 +85,15 @@ class App extends StatelessWidget {
 
     return MaterialApp(
       title: 'QuizMonke',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+      ],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -118,158 +116,169 @@ class App extends StatelessWidget {
         // LoginScreen.routeName: (context) => const LoginScreen(),
         // Quiz (probably shouldn't be named)
         QuizScreen.routeName: (context) => const QuizScreen(),
-        // Summary (probably shouldn't be named)
-        SummaryScreen.routeName: (context) => const SummaryScreen(),
-
-        '/sign-in': (context) {
-          return SignInScreen(
-            actions: [
-              ForgotPasswordAction((context, email) {
-                Navigator.pushNamed(
-                  context,
-                  '/forgot-password',
-                  arguments: {'email': email},
-                );
-              }),
-              AuthStateChangeAction((context, state) {
-                final user = switch (state) {
-                  SignedIn(user: final user) => user,
-                  CredentialLinked(user: final user) => user,
-                  UserCreated(credential: final cred) => cred.user,
-                  _ => null,
-                };
-
-                switch (user) {
-                  case User(emailVerified: true):
-                    FirebaseAnalytics.instance.logLogin();
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, HomeScreen.routeName, (route) => false);
-                  case User(emailVerified: false, email: final String _):
-                    Navigator.pushNamed(context, '/verify-email');
-                }
-              }),
-            ],
-            styles: const {
-              EmailFormStyle(signInButtonVariant: ButtonVariant.filled),
-            },
-            headerBuilder: headerImage('assets/logo.png'),
-            sideBuilder: sideImage('assets/logo.png'),
-            subtitleBuilder: (context, action) {
-              final actionText = switch (action) {
-                AuthAction.signIn => 'Please sign in to continue.',
-                AuthAction.signUp => 'Please create an account to continue',
-                _ => throw Exception('Invalid action: $action'),
-              };
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text('Welcome to QuizMonke! $actionText.'),
-              );
-            },
-            footerBuilder: (context, action) {
-              final actionText = switch (action) {
-                AuthAction.signIn => 'signing in',
-                AuthAction.signUp => 'registering',
-                _ => throw Exception('Invalid action: $action'),
-              };
-
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(text: "By $actionText, you agree to the "),
-                        TextSpan(
-                          text: "Terms and Conditions",
-                          style: const TextStyle(
-                              decoration: TextDecoration.underline),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PolicyScreen(
-                                    title: 'Terms and Conditions',
-                                    mdFileName:
-                                        'assets/terms_and_conditions.md',
-                                  ),
-                                ),
-                              );
-                            },
-                        ),
-                        const TextSpan(text: " and "),
-                        TextSpan(
-                          text: "Privacy Policy",
-                          style: const TextStyle(
-                              decoration: TextDecoration.underline),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PolicyScreen(
-                                    title: 'Privacy Policy',
-                                    mdFileName: 'assets/privacy_policy.md',
-                                  ),
-                                ),
-                              );
-                            },
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  /* Text(
-                    'By $actionText, you agree to our terms and conditions and our privacy policy.',
-                    style: const TextStyle(color: Colors.grey),
-                  ), */
-                ),
-              );
-            },
-          );
-        },
-
-        '/verify-email': (context) {
-          return EmailVerificationScreen(
-            headerBuilder: headerIcon(Icons.verified),
-            sideBuilder: sideIcon(Icons.verified),
-            // actionCodeSettings: actionCodeSettings,
-            actions: [
-              EmailVerifiedAction(() {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, HomeScreen.routeName, (route) => false);
-              }),
-              AuthCancelledAction((context) {
-                FirebaseUIAuth.signOut(context: context);
-                Navigator.pushReplacementNamed(context, '/sign-in');
-              }),
-            ],
-          );
-        },
-        '/forgot-password': (context) {
-          final arguments = ModalRoute.of(context)?.settings.arguments
-              as Map<String, dynamic>?;
-
-          return ForgotPasswordScreen(
-            email: arguments?['email'],
-            headerMaxExtent: 200,
-            headerBuilder: headerIcon(Icons.lock),
-            sideBuilder: sideIcon(Icons.lock),
-          );
-        },
-        '/profile': (context) {
-          return ProfileScreen(
-            actions: [
-              SignedOutAction((context) {
-                Navigator.pushReplacementNamed(context, '/sign-in');
-              }),
-            ],
-            // actionCodeSettings: actionCodeSettings,
-          );
-        },
+        '/sign-in': buildSignInScreen(context),
+        '/verify-email': buildEmailVerificationScreen(context),
+        '/forgot-password': buildForgotPasswordScreen(context),
+        '/profile': buildProfileScreen(context),
       },
     );
   }
+}
+
+WidgetBuilder buildSignInScreen(BuildContext context) {
+  return (context) {
+    return SignInScreen(
+      actions: [
+        ForgotPasswordAction((context, email) {
+          Navigator.pushNamed(
+            context,
+            '/forgot-password',
+            arguments: {'email': email},
+          );
+        }),
+        AuthStateChangeAction((context, state) {
+          final user = switch (state) {
+            SignedIn(user: final user) => user,
+            CredentialLinked(user: final user) => user,
+            UserCreated(credential: final cred) => cred.user,
+            _ => null,
+          };
+
+          switch (user) {
+            case User(emailVerified: true):
+              FirebaseAnalytics.instance.logLogin();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, HomeScreen.routeName, (route) => false);
+            case User(emailVerified: false, email: final String _):
+              Navigator.pushNamed(context, '/verify-email');
+          }
+        }),
+      ],
+      styles: const {
+        EmailFormStyle(signInButtonVariant: ButtonVariant.filled),
+      },
+      headerBuilder: headerImage('assets/logo.png'),
+      sideBuilder: sideImage('assets/logo.png'),
+      subtitleBuilder: (context, action) {
+        final actionText = switch (action) {
+          AuthAction.signIn => 'Please sign in to continue.',
+          AuthAction.signUp => 'Please create an account to continue',
+          _ => throw Exception('Invalid action: $action'),
+        };
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text('Welcome to QuizMonke! $actionText.'),
+        );
+      },
+      footerBuilder: (context, action) {
+        final actionText = switch (action) {
+          AuthAction.signIn => 'signing in',
+          AuthAction.signUp => 'registering',
+          _ => throw Exception('Invalid action: $action'),
+        };
+
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: "By $actionText, you agree to the "),
+                  TextSpan(
+                    text: "Terms and Conditions",
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PolicyScreen(
+                              title: 'Terms and Conditions',
+                              mdFileName: 'assets/terms_and_conditions.md',
+                            ),
+                          ),
+                        );
+                      },
+                  ),
+                  const TextSpan(text: " and "),
+                  TextSpan(
+                    text: "Privacy Policy",
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PolicyScreen(
+                              title: 'Privacy Policy',
+                              mdFileName: 'assets/privacy_policy.md',
+                            ),
+                          ),
+                        );
+                      },
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            /* Text(
+                    'By $actionText, you agree to our terms and conditions and our privacy policy.',
+                    style: const TextStyle(color: Colors.grey),
+                  ), */
+          ),
+        );
+      },
+    );
+  };
+}
+
+WidgetBuilder buildEmailVerificationScreen(BuildContext context) {
+  return (context) {
+    return EmailVerificationScreen(
+      headerBuilder: headerIcon(Icons.verified),
+      sideBuilder: sideIcon(Icons.verified),
+      // actionCodeSettings: actionCodeSettings,
+      actions: [
+        EmailVerifiedAction(() {
+          Navigator.pushNamedAndRemoveUntil(
+              context, HomeScreen.routeName, (route) => false);
+        }),
+        AuthCancelledAction((context) {
+          FirebaseUIAuth.signOut(context: context);
+          Navigator.pushReplacementNamed(context, '/sign-in');
+        }),
+      ],
+    );
+  };
+}
+
+WidgetBuilder buildForgotPasswordScreen(BuildContext context) {
+  return (context) {
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    return ForgotPasswordScreen(
+      email: arguments?['email'],
+      headerMaxExtent: 200,
+      headerBuilder: headerIcon(Icons.lock),
+      sideBuilder: sideIcon(Icons.lock),
+    );
+  };
+}
+
+WidgetBuilder buildProfileScreen(BuildContext context) {
+  return (context) {
+    return ProfileScreen(
+      actions: [
+        SignedOutAction((context) {
+          Navigator.pushReplacementNamed(context, '/sign-in');
+        }),
+      ],
+      // actionCodeSettings: actionCodeSettings,
+    );
+  };
 }

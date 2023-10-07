@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 from typing import List
 from firebase_admin import firestore
@@ -20,7 +21,27 @@ def generate_outline(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Generate an outline for the provided input. Organize the outline with paragraphs and multiple levels of bullets. Make sure that the outline is in the same language as the input text.
+        prompt_template = """Generate a structured outline (markdown) for the provided input. Make sure that the generated outline is in the same language as the input text.
+
+Here's a sample of part of a structured outline:
+
+SAMPLE OUTLINE: "
+## I. Astronaut's Perspective
+   A. Embracing the Unknown
+      1. Facing Fear
+         - Astronaut's initial apprehensions
+         - **Overcoming Fear:** Emphasize the courage needed
+      2. View from Space
+         - Describe the awe-inspiring experience
+         - _Unforgettable Moment:_ Highlight a specific view
+   B. Life in Zero Gravity
+      1. Adaptation
+         - Discuss challenges of living without gravity
+         - `Scientific Insight:` Brief explanation of zero gravity effects
+## II. Celestial Phenomena
+   A. Solar System Exploration
+      1. Martian Landscape
+         - Overview of Mars exploration"
 
 INPUT: "{text}"
 
@@ -49,6 +70,7 @@ OUTLINE:"""
 
         topic_ref.update(
             {
+                "timestamp": firestore.SERVER_TIMESTAMP,
                 "outline": res_text,
                 "outlineStatus": "done",
             }

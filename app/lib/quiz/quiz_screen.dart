@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/quiz/question_connect_terms.dart';
 import 'package:quizmonke/quiz/question_free_text.dart';
-
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/question_multiple_choice.dart';
 import 'package:quizmonke/quiz/question_multiple_choice_multi.dart';
@@ -40,8 +40,8 @@ class _QuizScreenState extends State<QuizScreen> {
       context: parentContext,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Congratulations!'),
-          content: const Text('Your answer is correct!'),
+          title: Text(AppLocalizations.of(context)!.congratulations),
+          content: Text(AppLocalizations.of(context)!.answerCorrect),
           actions: [
             TextButton(
               onPressed: () {
@@ -59,7 +59,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 });
                 Navigator.pop(parentContext);
               },
-              child: const Text('Next Question'),
+              child: Text(AppLocalizations.of(context)!.nextQuestion),
             ),
           ],
         );
@@ -74,15 +74,15 @@ class _QuizScreenState extends State<QuizScreen> {
       context: parentContext,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Bluh!'),
-          content: Text(
-              'Your answer is wrong! The correct answer is ${questionItem.answer}'),
+          title: Text(AppLocalizations.of(context)!.bluh),
+          content: Text(AppLocalizations.of(context)!
+              .answerWrong('${questionItem.answer}')),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(parentContext);
               },
-              child: const Text('Try again'),
+              child: Text(AppLocalizations.of(context)!.tryAgain),
             ),
             TextButton(
               onPressed: () {
@@ -100,7 +100,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 });
                 Navigator.pop(parentContext);
               },
-              child: const Text('Next Question'),
+              child: Text(AppLocalizations.of(context)!.nextQuestion),
             ),
           ],
         );
@@ -115,9 +115,9 @@ class _QuizScreenState extends State<QuizScreen> {
       context: parentContext,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Skipped!'),
-          content: Text(
-              'You skipped this question! The correct answer is ${questionItem.answer}'),
+          title: Text(AppLocalizations.of(context)!.skipped),
+          content: Text(AppLocalizations.of(context)!
+              .answerSkipped('${questionItem.answer}')),
           actions: [
             TextButton(
               onPressed: () {
@@ -135,7 +135,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 });
                 Navigator.pop(parentContext);
               },
-              child: const Text('Next Question'),
+              child: Text(AppLocalizations.of(context)!.nextQuestion),
             ),
           ],
         );
@@ -175,27 +175,32 @@ class _QuizScreenState extends State<QuizScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: (currentIndex < questions.length)
-            ? _buildQuestion(ValueKey(questions[currentIndex]), topicId,
-                questions[currentIndex], (correct) {
+            ? _buildQuestion(context, ValueKey(questions[currentIndex]),
+                topicId, questions[currentIndex], (correct) {
                 onAnswerChecked(questions[currentIndex], correct);
               })
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Quiz completed!',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Text(
+                    AppLocalizations.of(context)!.quizCompleted,
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Results Overview:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    AppLocalizations.of(context)!.resultsOverview,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  Text('Correct: $numberCorrect'),
-                  Text('Wrong: $numberWrong'),
-                  Text('Skipped: $numberSkipped'),
+                  Text(
+                      '${AppLocalizations.of(context)!.correctLabel} $numberCorrect'),
+                  Text(
+                      '${AppLocalizations.of(context)!.wrongLabel} $numberWrong'),
+                  Text(
+                      '${AppLocalizations.of(context)!.skippedLabel} $numberSkipped'),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
@@ -205,14 +210,14 @@ class _QuizScreenState extends State<QuizScreen> {
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    child: const Text('Generate more'),
+                    child: Text(AppLocalizations.of(context)!.generateMore),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     },
-                    child: const Text('Back'),
+                    child: Text(AppLocalizations.of(context)!.back),
                   ),
                 ],
               ),
@@ -221,8 +226,8 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
-Widget _buildQuestion(Key key, String topicId, QuestionItem questionItem,
-    Function(QuestionResult) onAnswerChecked) {
+Widget _buildQuestion(BuildContext context, Key key, String topicId,
+    QuestionItem questionItem, Function(QuestionResult) onAnswerChecked) {
   if (questionItem.type == "multiple_choice") {
     return QuestionMultipleChoice(
         key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);
@@ -243,7 +248,8 @@ Widget _buildQuestion(Key key, String topicId, QuestionItem questionItem,
       onTap: () {
         onAnswerChecked(QuestionResult.skipped);
       },
-      child: Text('Unsupported question type: ${questionItem.type}'),
+      child: Text(
+          AppLocalizations.of(context)!.unsupportedQuestion(questionItem.type)),
     );
   }
 }

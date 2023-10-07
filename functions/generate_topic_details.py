@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 from typing import List
 from firebase_admin import firestore
@@ -74,6 +75,7 @@ def generate_topic_details(topic_id: str):
 
         topic_ref.update(
             {
+                "timestamp": firestore.SERVER_TIMESTAMP,
                 "name": res.name,
                 "language": res.language,
                 "description": res.description,
