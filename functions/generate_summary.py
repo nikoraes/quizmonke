@@ -21,8 +21,7 @@ def generate_summary(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Summarize the provided INPUT.
-The generated summary must be in the same language as the INPUT!
+        prompt_template = """Summarize the provided INPUT. Detect the language of the INPUT and make sure that the generated SUMMARY is in the same language!
 
 INPUT: "{text}"
 

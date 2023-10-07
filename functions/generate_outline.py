@@ -21,8 +21,8 @@ def generate_outline(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Generate a structured outline (markdown) for the provided INPUT. 
-Make sure that the generated outline is in the same language as the INPUT.
+        prompt_template = """Generate a structured OUTLINE (in markdown) for the provided INPUT. 
+Detect the language of the INPUT and make sure that the generated OUTLINE is in the same language!
 
 Here's a sample of part of a structured OUTLINE:
 
