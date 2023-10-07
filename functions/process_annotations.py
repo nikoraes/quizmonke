@@ -12,33 +12,44 @@ def process_annotations(
 ):
     firestore_client: google.cloud.firestore.Client = firestore.client()
 
-    bucket_name = event.data.bucket
-    file_path = pathlib.PurePath(event.data.name)
+    try:
+        bucket_name = event.data.bucket
+        file_path = pathlib.PurePath(event.data.name)
 
-    print(str(file_path))
+        print(str(file_path))
 
-    if "annotations" not in str(file_path):
-        return
+        if "annotations" not in str(file_path):
+            return
 
-    topic_id = str(file_path).split("/")[1]
+        topic_id = str(file_path).split("/")[1]
 
-    bucket = storage.bucket(bucket_name)
-    blob = bucket.blob(str(file_path))
-    annotation_responses = json.loads(blob.download_as_string())
+        bucket = storage.bucket(bucket_name)
+        blob = bucket.blob(str(file_path))
+        annotation_responses = json.loads(blob.download_as_string())
 
-    print(f"process_annotations - {annotation_responses}")
+        print(f"process_annotations - {annotation_responses}")
 
-    for res in annotation_responses["responses"]:
-        # store in db
-        firestore_client.collection(f"topics/{topic_id}/files").add(
-            {
-                "uri": res["context"]["uri"],
-                "text": res["fullTextAnnotation"]["text"],
-            }
+        for res in annotation_responses["responses"]:
+            # store in db
+            firestore_client.collection(f"topics/{topic_id}/files").add(
+                {
+                    "uri": res["context"]["uri"],
+                    "text": res["fullTextAnnotation"]["text"],
+                }
+            )
+
+        firestore_client.collection("topics").document(topic_id).update(
+            {"timestamp": firestore.SERVER_TIMESTAMP, "extractStatus": "done"}
         )
 
-    firestore_client.collection("topics").document(topic_id).update(
-        {"timestamp": firestore.SERVER_TIMESTAMP, "extractStatus": "done"}
-    )
+        return topic_id
 
-    return topic_id
+    except Exception as error:
+        error_name = type(error).__name__
+        print(
+            f"process_annotations - Error while processing annotations: {error_name} {error} {error.__traceback__}"
+        )
+        firestore_client.collection("topics").document(topic_id).update(
+            {"status": f"error: {error_name}"}
+        )
+        return None

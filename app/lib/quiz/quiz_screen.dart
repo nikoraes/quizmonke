@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:quizmonke/home/topic_card.dart';
 import 'package:quizmonke/quiz/question_connect_terms.dart';
 import 'package:quizmonke/quiz/question_free_text.dart';
 import 'package:quizmonke/quiz/question_item.dart';
@@ -179,47 +180,52 @@ class _QuizScreenState extends State<QuizScreen> {
                 topicId, questions[currentIndex], (correct) {
                 onAnswerChecked(questions[currentIndex], correct);
               })
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.quizCompleted,
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    AppLocalizations.of(context)!.resultsOverview,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                      '${AppLocalizations.of(context)!.correctLabel} $numberCorrect'),
-                  Text(
-                      '${AppLocalizations.of(context)!.wrongLabel} $numberWrong'),
-                  Text(
-                      '${AppLocalizations.of(context)!.skippedLabel} $numberSkipped'),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add logic to generate more questions
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            : Align(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 100),
+                    Text(
+                      AppLocalizations.of(context)!.quizCompleted,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    child: Text(AppLocalizations.of(context)!.generateMore),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                    child: Text(AppLocalizations.of(context)!.back),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    Text(
+                      AppLocalizations.of(context)!.resultsOverview,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                        '${AppLocalizations.of(context)!.correctLabel} $numberCorrect'),
+                    Text(
+                        '${AppLocalizations.of(context)!.wrongLabel} $numberWrong'),
+                    Text(
+                        '${AppLocalizations.of(context)!.skippedLabel} $numberSkipped'),
+                    const SizedBox(height: 20),
+                    /* ElevatedButton(
+                      onPressed: () {
+                        generateQuiz(topicId);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                      child: Text(AppLocalizations.of(context)!.generateMore),
+                    ), */
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      },
+                      child: Text(AppLocalizations.of(context)!.back),
+                    ),
+                  ],
+                ),
               ),
       ),
     );

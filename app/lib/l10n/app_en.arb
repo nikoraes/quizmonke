@@ -1,4 +1,8 @@
 {
+    "quiz": "Quiz",
+    "summary": "Summary",
+    "outline": "Outline",
+    "preview": "Preview",
     "generateQuiz": "Generate Quiz",
     "generateSummary": "Generate Summary",
     "generateOutline": "Generate Outline",

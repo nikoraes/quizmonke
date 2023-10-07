@@ -1,7 +1,9 @@
 import logging
 from typing import Any
 from firebase_functions import https_fn
+from firebase_admin import firestore
 from google.cloud import vision
+import google.cloud.firestore
 
 
 def batch_annotate(req: https_fn.CallableRequest) -> Any:
@@ -17,20 +19,33 @@ def batch_annotate(req: https_fn.CallableRequest) -> Any:
 
     topic_id = req.data["topicId"]
 
-    output_uri = f"gs://schoolscan-4c8d8.appspot.com/topics/{topic_id}/annotations/"
-    gcs_destination = {"uri": output_uri}
-    batch_size = 50
-    output_config = {"gcs_destination": gcs_destination, "batch_size": batch_size}
+    firestore_client: google.cloud.firestore.Client = firestore.client()
 
-    vision_client = vision.ImageAnnotatorClient()
+    try:
+        output_uri = f"gs://schoolscan-4c8d8.appspot.com/topics/{topic_id}/annotations/"
+        gcs_destination = {"uri": output_uri}
+        batch_size = 50
+        output_config = {"gcs_destination": gcs_destination, "batch_size": batch_size}
 
-    print(f"{requests} - {output_config}")
+        vision_client = vision.ImageAnnotatorClient()
 
-    operation = vision_client.async_batch_annotate_images(
-        requests=requests, output_config=output_config
-    )
+        print(f"{requests} - {output_config}")
 
-    print("batch_annotate - Waiting for operation to complete...")
-    operation.result(60)
+        operation = vision_client.async_batch_annotate_images(
+            requests=requests, output_config=output_config
+        )
 
-    return {"done": True}
+        print("batch_annotate - Waiting for operation to complete...")
+        operation.result(60)
+
+        return {"done": True}
+
+    except Exception as error:
+        error_name = type(error).__name__
+        print(
+            f"batch_annotate - Error while submitting annotation request: {error_name} {error} {error.__traceback__}"
+        )
+        firestore_client.collection("topics").document(topic_id).update(
+            {"status": f"error: {error_name}"}
+        )
+        return {"done": False, "status": f"error: {error_name}"}

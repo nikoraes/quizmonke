@@ -367,15 +367,19 @@ class _TopicCardState extends State<TopicCard>
                               horizontal: 2.0, vertical: 0.0),
                           leading: widget.quizStatus == "done"
                               ? const Icon(Icons.quiz_outlined)
-                              // TODO: show error icon if status is error
-                              : const SizedBox(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.0, // Adjust the strokeWidth
-                                  ),
-                                ),
-                          title: const Text('Quiz'),
+                              : widget.quizStatus != null &&
+                                      widget.quizStatus!.contains("error")
+                                  ? const Icon(Icons.error_outline,
+                                      color: Colors.red)
+                                  : const SizedBox(
+                                      width: 20.0,
+                                      height: 20.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth:
+                                            2.0, // Adjust the strokeWidth
+                                      ),
+                                    ),
+                          title: Text(AppLocalizations.of(context)!.quiz),
                           onTap: () {
                             openQuiz(widget.id);
                           },
@@ -388,18 +392,25 @@ class _TopicCardState extends State<TopicCard>
                               horizontal: 2.0, vertical: 0.0),
                           leading: widget.summaryStatus == "done"
                               ? const Icon(Icons.text_snippet_outlined)
-                              // TODO: show error icon if status is error
-                              : const SizedBox(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  child: CircularProgressIndicator(),
-                                ),
+                              : widget.summaryStatus != null &&
+                                      widget.summaryStatus!.contains("error")
+                                  ? const Icon(Icons.error_outline,
+                                      color: Colors.red)
+                                  : const SizedBox(
+                                      width: 20.0,
+                                      height: 20.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth:
+                                            2.0, // Adjust the strokeWidth
+                                      ),
+                                    ),
                           title: Row(
                             children: [
-                              const Text('Summary '),
+                              Text(AppLocalizations.of(context)!.summary),
                               Badge(
                                 alignment: Alignment.topLeft,
-                                label: const Text('preview'),
+                                label:
+                                    Text(AppLocalizations.of(context)!.preview),
                                 backgroundColor:
                                     Theme.of(context).colorScheme.primary,
                                 textColor:
@@ -420,18 +431,26 @@ class _TopicCardState extends State<TopicCard>
                               horizontal: 2.0, vertical: 0.0),
                           leading: widget.outlineStatus == "done"
                               ? const Icon(Icons.format_list_bulleted_outlined)
-                              // TODO: show error icon if status is error
-                              : const SizedBox(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  child: CircularProgressIndicator(),
-                                ),
+                              : widget.outlineStatus != null &&
+                                      widget.outlineStatus!.contains("error")
+                                  ? const Icon(Icons.error_outline,
+                                      color: Colors.red)
+                                  : const SizedBox(
+                                      width: 20.0,
+                                      height: 20.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth:
+                                            2.0, // Adjust the strokeWidth
+                                      ),
+                                    ),
                           title: Row(
                             children: [
-                              const Text('Outline '),
+                              Text(AppLocalizations.of(context)!.outline),
                               Badge(
                                 alignment: Alignment.topLeft,
-                                label: const Text('preview'),
+                                offset: const Offset(6, -4),
+                                label:
+                                    Text(AppLocalizations.of(context)!.preview),
                                 backgroundColor:
                                     Theme.of(context).colorScheme.primary,
                                 textColor:
