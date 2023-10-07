@@ -1,6 +1,6 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:quizmonke/home/topic_card.dart';
 import 'package:quizmonke/quiz/question_connect_terms.dart';
 import 'package:quizmonke/quiz/question_free_text.dart';
 import 'package:quizmonke/quiz/question_item.dart';
@@ -31,6 +31,10 @@ class _QuizScreenState extends State<QuizScreen> {
   late List<QuestionItem> questions;
   int currentIndex = 0;
 
+  int numberCorrect = 0;
+  int numberWrong = 0;
+  int numberSkipped = 0;
+
   @override
   void initState() {
     super.initState();
@@ -48,13 +52,6 @@ class _QuizScreenState extends State<QuizScreen> {
               onPressed: () {
                 print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
-                if (currentIndex < questions.length - 1) {
-                } else {
-                  // Handle the case when all questions are completed.
-                  // You can navigate to a summary screen or perform other actions.
-                  // For now, just print a message.
-                  print('All questions completed.');
-                }
                 setState(() {
                   currentIndex++; // Move to the next question
                 });
@@ -79,30 +76,27 @@ class _QuizScreenState extends State<QuizScreen> {
           content: Text(AppLocalizations.of(context)!
               .answerWrong('${questionItem.answer}')),
           actions: [
-            TextButton(
+            /* TextButton(
               onPressed: () {
                 Navigator.pop(parentContext);
               },
               child: Text(AppLocalizations.of(context)!.tryAgain),
-            ),
+            ), */
             TextButton(
               onPressed: () {
                 print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
-                if (currentIndex < questions.length - 1) {
-                } else {
-                  // Handle the case when all questions are completed.
-                  // You can navigate to a summary screen or perform other actions.
-                  // For now, just print a message.
-                  print('All questions completed.');
-                }
                 setState(() {
                   currentIndex++; // Move to the next question
                 });
+                // Add the question to the end again
+                questions.add(questionItem);
+                // close dialog
                 Navigator.pop(parentContext);
               },
               child: Text(AppLocalizations.of(context)!.nextQuestion),
             ),
+            // TODO: also add a skip button here and ask why it was skipped
           ],
         );
       },
@@ -117,6 +111,7 @@ class _QuizScreenState extends State<QuizScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: Text(AppLocalizations.of(context)!.skipped),
+          // Add something to provide feedback on why it was skipped (and potentially remove the question from the quiz)
           content: Text(AppLocalizations.of(context)!
               .answerSkipped('${questionItem.answer}')),
           actions: [
@@ -124,13 +119,6 @@ class _QuizScreenState extends State<QuizScreen> {
               onPressed: () {
                 print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
-                if (currentIndex < questions.length - 1) {
-                } else {
-                  // Handle the case when all questions are completed.
-                  // You can navigate to a summary screen or perform other actions.
-                  // For now, just print a message.
-                  print('All questions completed.');
-                }
                 setState(() {
                   currentIndex++; // Move to the next question
                 });
@@ -150,28 +138,34 @@ class _QuizScreenState extends State<QuizScreen> {
     questions = args.questions;
     topicId = args.topicId;
 
-    int numberCorrect = 0;
-    int numberWrong = 0;
-    int numberSkipped = 0;
-
     void onAnswerChecked(QuestionItem questionItem, QuestionResult result) {
+      FirebaseAnalytics.instance
+          .logEvent(name: "quiz_answer_checked", parameters: {
+        "topic_id": topicId,
+        "question_id": questionItem.id,
+        "result": QuestionResult.correct.name,
+      });
       if (result == QuestionResult.correct) {
         showCongratulatoryScreen(context);
-        numberCorrect++;
+        setState(() {
+          numberCorrect++;
+        });
       } else if (result == QuestionResult.skipped) {
         showSkippedAnswerScreen(context, questionItem);
-        numberSkipped++;
+        setState(() {
+          numberSkipped++;
+        });
       } else {
-        // Add the question to the end again
-        questions.add(questionItem);
         showIncorrectAnswerScreen(context, questionItem);
-        numberWrong++;
+        setState(() {
+          numberWrong++;
+        });
       }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${args.topicName} - $currentIndex'),
+        title: Text('${args.topicName} - $currentIndex/${questions.length}'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
@@ -234,6 +228,11 @@ class _QuizScreenState extends State<QuizScreen> {
 
 Widget _buildQuestion(BuildContext context, Key key, String topicId,
     QuestionItem questionItem, Function(QuestionResult) onAnswerChecked) {
+  FirebaseAnalytics.instance.logEvent(name: "quiz_build_question", parameters: {
+    "topic_id": topicId,
+    "question_id": questionItem.id,
+    "type": questionItem.type,
+  });
   if (questionItem.type == "multiple_choice") {
     return QuestionMultipleChoice(
         key: key, questionItem: questionItem, onAnswerChecked: onAnswerChecked);

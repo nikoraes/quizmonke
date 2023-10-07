@@ -59,7 +59,7 @@ The quiz you generate will have 5 question items and you can have 4 types of que
     2.Multiple choice with multiple answers (multiple_choice_multi): provide at least 3 choices per question and provide the correct answers, separated by commas (a potential correct value for answer could be 'foo,bar,test').
     3.Connect relevant terms (connect_terms): at least 3 terms in a random order in 1 column and at least 3 terms in a random order in the other column. The person that takes the test must select a matching term in each column.
     4.A free text question (free_text). Make sure to ask a question of which the answer can be found in the provided text, and make sure to provide the correct answer in the answer field. 'What do you think of ...?' is not a good question!
-For each question, you also need to provide the correct answer. Make sure that the correct answer is exactly the same as the value of the choice (for connect_terms it should format a string with the indexes of the answers for each column '1-3,2-2,3-1'). 
+For each question, you also need to provide the correct answer. Make sure that the correct answer is exactly the same as the value of the choice (for connect_terms it should format a string with the indexes of the answers for each column '1-3,2-2,3-1').
 The question should be concise and clear. The question should not list possible choices.
 Questions, choices and answers should always be short and concise: answers should never be more than 3 words.
 
