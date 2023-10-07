@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import logging
 import pathlib
@@ -37,7 +38,7 @@ def process_annotations(
         )
 
     firestore_client.collection("topics").document(topic_id).update(
-        {"extractStatus": "done"}
+        {"timestamp": firestore.SERVER_TIMESTAMP, "extractStatus": "done"}
     )
 
     return topic_id

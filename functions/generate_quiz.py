@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 from typing import List, Optional
 from firebase_admin import firestore
@@ -107,6 +108,7 @@ Make sure to only answer with a valid JSON in the correct format.
 
         firestore_client.collection("topics").document(topic_id).update(
             {
+                "timestamp": firestore.SERVER_TIMESTAMP,
                 "quizStatus": "done",
             }
         )
