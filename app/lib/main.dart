@@ -3,6 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/gestures.dart';
@@ -31,36 +32,40 @@ final emailLinkProviderConfig = EmailLinkAuthProvider(
 */
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await FirebaseAppCheck.instance.activate(
-    webProvider: ReCaptchaV3Provider(kWebRecaptchaSiteKey),
-    // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
-    // your preferred provider. Choose from:
-    // 1. Debug provider
-    // 2. Safety Net provider
-    // 3. Play Integrity provider
-    androidProvider: AndroidProvider.playIntegrity,
-    // Default provider for iOS/macOS is the Device Check provider. You can use the "AppleProvider" enum to choose
-    // your preferred provider. Choose from:
-    // 1. Debug provider
-    // 2. Device Check provider
-    // 3. App Attest provider
-    // 4. App Attest provider with fallback to Device Check provider (App Attest provider is only available on iOS 14.0+, macOS 14.0+)
-    appleProvider: AppleProvider.appAttest,
-  );
-  FirebaseAuth.instance.authStateChanges().listen((User? user) {
-    if (user == null) {
-      print('User is currently signed out!');
-    } else {
-      print('User ${user.uid} ${user.displayName} is signed in!');
-    }
-  });
-  FirebaseUIAuth.configureProviders(
-      [EmailAuthProvider(), GoogleProvider(clientId: GOOGLE_CLIENT_ID)]);
-  runApp(const App());
+  runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // Pass all uncaught errors from the framework to Crashlytics.
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+    await FirebaseAppCheck.instance.activate(
+      webProvider: ReCaptchaV3Provider(kWebRecaptchaSiteKey),
+      // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
+      // your preferred provider. Choose from:
+      // 1. Debug provider
+      // 2. Safety Net provider
+      // 3. Play Integrity provider
+      androidProvider: AndroidProvider.playIntegrity,
+      // Default provider for iOS/macOS is the Device Check provider. You can use the "AppleProvider" enum to choose
+      // your preferred provider. Choose from:
+      // 1. Debug provider
+      // 2. Device Check provider
+      // 3. App Attest provider
+      // 4. App Attest provider with fallback to Device Check provider (App Attest provider is only available on iOS 14.0+, macOS 14.0+)
+      appleProvider: AppleProvider.appAttest,
+    );
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        print('User is currently signed out!');
+      } else {
+        print('User ${user.uid} ${user.displayName} is signed in!');
+      }
+    });
+    FirebaseUIAuth.configureProviders(
+        [EmailAuthProvider(), GoogleProvider(clientId: GOOGLE_CLIENT_ID)]);
+    runApp(const App());
+  }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
 }
 
 class App extends StatelessWidget {

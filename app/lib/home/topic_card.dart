@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
 import 'package:quizmonke/summary/summary_screen.dart';
 
 Future<void> deleteTopic(String topicId) async {
+  FirebaseAnalytics.instance.logEvent(name: "delete_topic", parameters: {
+    "topic_id": topicId,
+  });
   final batch = FirebaseFirestore.instance.batch();
   // questions
   var questions = await FirebaseFirestore.instance
