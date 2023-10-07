@@ -239,31 +239,15 @@ class _TopicCardState extends State<TopicCard>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              // TODO: progress indicator should have more padding
-              if (widget.quizStatus != "done")
-                const SizedBox(
-                  width: 20.0,
-                  height: 20.0,
-                  child: CircularProgressIndicator(),
+              Expanded(
+                // Wrap the Text widget with Expanded
+                child: Text(
+                  widget.name ?? 'Loading...',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              if (widget.name != null)
-                Expanded(
-                  // Wrap the Text widget with Expanded
-                  child: Text(
-                    '${widget.name}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              else
-                Expanded(
-                  // Wrap the Text widget with Expanded
-                  child: Text(
-                    "Loading",
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
+              ),
               // Menu
               buildMenu()
             ],
@@ -274,14 +258,7 @@ class _TopicCardState extends State<TopicCard>
               alignment: Alignment.topLeft,
               child: Text('${widget.description}'),
             ),
-          const SizedBox(height: 20),
-          // List of chips with tags
-          if (widget.tags != null)
-            Wrap(
-              spacing: 8.0, // Adjust the spacing between chips as needed
-              children:
-                  widget.tags!.map((tag) => Chip(label: Text(tag))).toList(),
-            ),
+          const SizedBox(height: 16),
         ],
       );
     }
@@ -305,6 +282,21 @@ class _TopicCardState extends State<TopicCard>
                       .drive(CurveTween(curve: Curves.easeInOut)),
                   child: Column(
                     children: [
+                      // List of chips with tags
+                      if (isExpanded && widget.tags != null)
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Wrap(
+                            spacing:
+                                4.0, // Adjust the spacing between chips as needed
+                            runSpacing: -8.0,
+                            children: widget.tags!
+                                .map((tag) => Chip(
+                                    label: Text(tag),
+                                    padding: const EdgeInsets.all(0)))
+                                .toList(),
+                          ),
+                        ),
                       if (isExpanded && widget.quizStatus != null)
                         ListTile(
                           dense: true,

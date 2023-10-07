@@ -20,7 +20,7 @@ def generate_outline(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Generate an outline for the provided input in the same language as the input (use markdown with backslash n linebreaks).
+        prompt_template = """Generate an outline for the provided input in the same language as the input (use markdown with backslash n linebreaks). Organize the outline with paragraphs and multiple levels of bullets. 
 
 INPUT: "{text}"
 

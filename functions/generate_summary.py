@@ -20,7 +20,7 @@ def generate_summary(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Summarize the provided input in the same language as the input. Structure your text and emphasize important words in markdown.
+        prompt_template = """Summarize the provided input in the same language as the input. Use multiple paragraphs and structure your text and emphasize important words in markdown.
 
 INPUT: "{text}"
 
