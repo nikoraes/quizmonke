@@ -3,7 +3,7 @@ description: Learn Anything, Anywhere, Instantly.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 
-version: 0.1.1+6
+version: 0.1.2+7
 
 environment:
   sdk: '>=3.1.1 <4.0.0'
@@ -29,6 +29,7 @@ dependencies:
   google_fonts: ^6.1.0
   firebase_ui_auth: ^1.8.0
   firebase_ui_oauth_google: ^1.2.11
+  file_picker: ^5.5.0
 
 dev_dependencies:
   flutter_test:

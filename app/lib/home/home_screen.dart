@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quizmonke/home/topics_list.dart';
 import 'package:quizmonke/multicamera/camera_file.dart';
@@ -40,9 +44,29 @@ class _HomeScreenState extends State<HomeScreen> {
       body: const TopicsList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          MultipleImageCamera.capture(context: context).then((imgs) {
-            onImagesCaptured(imgs);
-          });
+          // Show a file picker on web
+          if (kIsWeb) {
+            FilePicker.platform.pickFiles(
+              type: FileType.custom,
+              allowedExtensions: ['jpg', 'jpeg'],
+            ).then((result) {
+              if (result != null) {
+                List<MediaModel> imageList = <MediaModel>[];
+                for (int i = 0; i < result.files.length; i++) {
+                  File file = File(result.files[i].name);
+                  imageList.add(
+                    MediaModel.blob(file, "", file.readAsBytesSync()),
+                  );
+                }
+                onImagesCaptured(imageList);
+              }
+            });
+          } else {
+            // Use camera in app
+            MultipleImageCamera.capture(context: context).then((imgs) {
+              onImagesCaptured(imgs);
+            });
+          }
         },
         child: const Icon(Icons.add_a_photo_outlined),
       ),
