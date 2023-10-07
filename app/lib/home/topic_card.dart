@@ -114,7 +114,6 @@ class _TopicCardState extends State<TopicCard>
   @override
   Widget build(BuildContext context) {
     void openQuiz(String id) async {
-      print("Card $id Clicked");
       // Get all questions from store
       FirebaseFirestore.instance.collection("topics/$id/questions").get().then(
         (querySnapshot) {
@@ -138,8 +137,14 @@ class _TopicCardState extends State<TopicCard>
     }
 
     void openSummary(String id, String summary) {
+      // TODO: make generic markdown screen
       Navigator.pushNamed(context, SummaryScreen.routeName,
           arguments: SummaryArguments(id, "${widget.name}", summary));
+    }
+
+    void openOutline(String id, String outline) {
+      Navigator.pushNamed(context, SummaryScreen.routeName,
+          arguments: SummaryArguments(id, "${widget.name}", outline));
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
@@ -199,7 +204,7 @@ class _TopicCardState extends State<TopicCard>
             },
           ),
           MenuItemButton(
-            child: const Text('Generate Summary'),
+            child: const Text('Generate Outline'),
             onPressed: () {
               generateOutline(widget.id);
             },
@@ -376,7 +381,7 @@ class _TopicCardState extends State<TopicCard>
                               const Text('Outline'),
                               Badge(
                                 alignment: Alignment.topLeft,
-                                label: const Text('coming soon'),
+                                label: const Text('preview'),
                                 backgroundColor:
                                     Theme.of(context).colorScheme.primary,
                                 textColor:

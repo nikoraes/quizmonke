@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -34,6 +35,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   await FirebaseAppCheck.instance.activate(
     webProvider: ReCaptchaV3Provider(kWebRecaptchaSiteKey),
     // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
@@ -64,6 +66,9 @@ Future<void> main() async {
 
 class App extends StatelessWidget {
   const App({super.key});
+
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 
   String get initialRoute {
     final user = FirebaseAuth.instance.currentUser;
@@ -101,6 +106,7 @@ class App extends StatelessWidget {
         textButtonTheme: TextButtonThemeData(style: buttonStyle),
         outlinedButtonTheme: OutlinedButtonThemeData(style: buttonStyle),
       ),
+      navigatorObservers: <NavigatorObserver>[observer],
       initialRoute: initialRoute,
       routes: {
         // Home (topics list)
