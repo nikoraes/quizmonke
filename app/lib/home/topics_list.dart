@@ -56,10 +56,14 @@ class TopicsListState extends State<TopicsList> {
                   name: data['name'],
                   description: data['description'],
                   status: data['status'],
+                  tags:
+                      data['tags'] is Iterable ? List.from(data['tags']) : null,
                   extractStatus: data['extractStatus'],
                   quizStatus: data['quizStatus'],
                   summaryStatus: data['summaryStatus'],
                   summary: data['summary'],
+                  outlineStatus: data['outlineStatus'],
+                  outline: data['outline'],
                 );
               })
               .toList()

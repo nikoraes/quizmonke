@@ -20,7 +20,7 @@ def generate_summary(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Summarize the provided input in the same language as the input.
+        prompt_template = """Summarize the provided input in the same language as the input. Structure your text and emphasize important words in markdown.
 
 INPUT: "{text}"
 
@@ -31,7 +31,7 @@ SUMMARY:"""
             input_variables=["text"],
         )
         final_prompt = prompt.format(text=fulltext)
-        logging.debug(f"generate_summary - final_prompt: {final_prompt}")
+        print(f"generate_summary - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -45,7 +45,7 @@ SUMMARY:"""
 
         res_text = llm(final_prompt)
 
-        logging.debug(f"generate_summary - res_text: {res_text}")
+        print(f"generate_summary - res_text: {res_text}")
 
         topic_ref.update(
             {
@@ -58,7 +58,7 @@ SUMMARY:"""
 
     except Exception as error:
         error_name = type(error).__name__
-        logging.error(
+        print(
             f"summarize - Error while generating summary: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(

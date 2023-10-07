@@ -35,7 +35,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   await FirebaseAppCheck.instance.activate(
     webProvider: ReCaptchaV3Provider(kWebRecaptchaSiteKey),
     // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
@@ -137,6 +136,7 @@ class App extends StatelessWidget {
 
                 switch (user) {
                   case User(emailVerified: true):
+                    FirebaseAnalytics.instance.logLogin();
                     Navigator.pushNamedAndRemoveUntil(
                         context, HomeScreen.routeName, (route) => false);
                   case User(emailVerified: false, email: final String _):

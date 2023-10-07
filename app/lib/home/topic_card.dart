@@ -57,10 +57,12 @@ Future<void> generateOutline(String topicId) async {
   print("Response: $response");
 }
 
+// TODO: create Firestore converters
 class TopicCard extends StatefulWidget {
   final String id;
   final String? name;
   final String? description;
+  final List<String>? tags;
   final String? status;
   final String? summary;
   final String? outline;
@@ -74,6 +76,7 @@ class TopicCard extends StatefulWidget {
     required this.id,
     this.name,
     this.description,
+    this.tags,
     this.summary,
     this.outline,
     this.status,
@@ -121,11 +124,20 @@ class _TopicCardState extends State<TopicCard>
           for (var docSnapshot in querySnapshot.docs) {
             print('${docSnapshot.id} => ${docSnapshot.data()}');
           }
+          List<QuestionItem> questions = <QuestionItem>[];
+          for (var doc in querySnapshot.docs) {
+            try {
+              var q = QuestionItem.fromFirestore(doc, null);
+              questions.add(q);
+            } catch (e) {
+              print("Error processing: $e");
+            }
+          }
           // Parse to QuestionItem
-          List<QuestionItem> questions =
+          /* List<QuestionItem> questions =
               querySnapshot.docs.map((querySnapshot) {
             return QuestionItem.fromFirestore(querySnapshot, null);
-          }).toList();
+          }).toList(); */
           // Shuffle questions
           questions.shuffle();
           // Send to quiz (TODO: avoid using named route)
@@ -262,31 +274,14 @@ class _TopicCardState extends State<TopicCard>
               alignment: Alignment.topLeft,
               child: Text('${widget.description}'),
             ),
-          /* Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(id),
-                ), */
           const SizedBox(height: 20),
-          /* if (status != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('status: $status'),
-                  ),
-                if (extractStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('extraction: $extractStatus'),
-                  ),
-                if (summaryStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('summary: $summaryStatus'),
-                  ),
-                if (quizStatus != null)
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text('quiz: $quizStatus'),
-                  ), */
+          // List of chips with tags
+          if (widget.tags != null)
+            Wrap(
+              spacing: 8.0, // Adjust the spacing between chips as needed
+              children:
+                  widget.tags!.map((tag) => Chip(label: Text(tag))).toList(),
+            ),
         ],
       );
     }
@@ -310,7 +305,7 @@ class _TopicCardState extends State<TopicCard>
                       .drive(CurveTween(curve: Curves.easeInOut)),
                   child: Column(
                     children: [
-                      if (isExpanded)
+                      if (isExpanded && widget.quizStatus != null)
                         ListTile(
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
@@ -331,7 +326,7 @@ class _TopicCardState extends State<TopicCard>
                             openQuiz(widget.id);
                           },
                         ),
-                      if (isExpanded)
+                      if (isExpanded && widget.summaryStatus != null)
                         ListTile(
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
@@ -359,10 +354,11 @@ class _TopicCardState extends State<TopicCard>
                             ],
                           ),
                           onTap: () {
+                            if (widget.summary == null) return;
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
-                      if (isExpanded)
+                      if (isExpanded && widget.outlineStatus != null)
                         ListTile(
                           dense: true,
                           visualDensity: const VisualDensity(vertical: -2),
@@ -378,7 +374,7 @@ class _TopicCardState extends State<TopicCard>
                                 ),
                           title: Row(
                             children: [
-                              const Text('Outline'),
+                              const Text('Outline '),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label: const Text('preview'),
@@ -390,6 +386,7 @@ class _TopicCardState extends State<TopicCard>
                             ],
                           ),
                           onTap: () {
+                            if (widget.outline == null) return;
                             openSummary(widget.id, '${widget.outline}');
                           },
                         ),

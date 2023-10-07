@@ -53,7 +53,7 @@ def generate_topic_details(topic_id: str):
             input_variables=["text"],
         )
         final_prompt = prompt.format(text=fulltext)
-        logging.debug(f"generate_topic_details - final prompt: {final_prompt}")
+        print(f"generate_topic_details - final prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -66,11 +66,11 @@ def generate_topic_details(topic_id: str):
         )
         res_text = llm(final_prompt)
 
-        logging.debug(f"generate_quiz - res_text: {res_text}")
+        print(f"generate_quiz - res_text: {res_text}")
 
         res = output_parser.parse(res_text)
 
-        logging.debug(f"generate_quiz - res: {res}")
+        print(f"generate_quiz - res: {res}")
 
         topic_ref.update(
             {
@@ -86,7 +86,7 @@ def generate_topic_details(topic_id: str):
 
     except Exception as error:
         error_name = type(error).__name__
-        logging.error(
+        print(
             f"generate_topic_details - Error while generating topic details: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
