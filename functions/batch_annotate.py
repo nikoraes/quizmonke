@@ -36,7 +36,7 @@ def batch_annotate(req: https_fn.CallableRequest) -> Any:
         )
 
         print("batch_annotate - Waiting for operation to complete...")
-        operation.result(60)
+        operation.result(120)
 
         return {"done": True}
 

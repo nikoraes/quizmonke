@@ -32,7 +32,7 @@ SUMMARY:"""
             input_variables=["text"],
         )
         final_prompt = prompt.format(text=fulltext)
-        print(f"generate_summary - final_prompt: {final_prompt}")
+        print(f"generate_summary - {topic_id} - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -46,7 +46,7 @@ SUMMARY:"""
 
         res_text = llm(final_prompt)
 
-        print(f"generate_summary - res_text: {res_text}")
+        print(f"generate_summary - {topic_id} - res_text: {res_text}")
 
         topic_ref.update(
             {
@@ -61,7 +61,7 @@ SUMMARY:"""
     except Exception as error:
         error_name = type(error).__name__
         print(
-            f"summarize - Error while generating summary: {error_name} {error} {error.__traceback__}"
+            f"generate_summary - {topic_id} - Error while generating summary: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"summaryStatus": f"error: {error_name}"}

@@ -27,7 +27,7 @@ def process_annotations(
         blob = bucket.blob(str(file_path))
         annotation_responses = json.loads(blob.download_as_string())
 
-        print(f"process_annotations - {annotation_responses}")
+        print(f"process_annotations - {topic_id} - {annotation_responses}")
 
         for res in annotation_responses["responses"]:
             # store in db
@@ -47,7 +47,7 @@ def process_annotations(
     except Exception as error:
         error_name = type(error).__name__
         print(
-            f"process_annotations - Error while processing annotations: {error_name} {error} {error.__traceback__}"
+            f"process_annotations - {topic_id} - Error while processing annotations: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"extractStatus": f"error: {error_name}"}

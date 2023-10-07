@@ -24,9 +24,7 @@ def generate_outline(topic_id: str):
         prompt_template = """Generate a structured OUTLINE (in markdown) for the provided INPUT. 
 Detect the language of the INPUT and make sure that the generated OUTLINE is in the same language!
 
-Here's a sample of part of a structured OUTLINE:
-
-SAMPLE OUTLINE: "
+Here's a sample of a structured OUTLINE format: "
 ## I. Astronaut's Perspective
 
    A. Embracing the Unknown
@@ -61,7 +59,7 @@ OUTLINE:"""
             input_variables=["text"],
         )
         final_prompt = prompt.format(text=fulltext)
-        print(f"generate_outline - final_prompt: {final_prompt}")
+        print(f"generate_outline - {topic_id} - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -75,7 +73,7 @@ OUTLINE:"""
 
         res_text = llm(final_prompt)
 
-        print(f"generate_outline - res_text: {res_text}")
+        print(f"generate_outline - {topic_id} - res_text: {res_text}")
 
         topic_ref.update(
             {
@@ -90,7 +88,7 @@ OUTLINE:"""
     except Exception as error:
         error_name = type(error).__name__
         print(
-            f"generate_outline - Error while generating outline: {error_name} {error} {error.__traceback__}"
+            f"generate_outline - {topic_id} - Error while generating outline: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"outlineStatus": f"error: {error_name}"}

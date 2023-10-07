@@ -95,11 +95,11 @@ Make sure that all output is in the same language as the input text (all field v
 
         res_text = llm(final_prompt)
 
-        print(f"generate_quiz - res_text: {res_text}")
+        print(f"generate_quiz - {topic_id} - res_text: {res_text}")
 
         res = output_parser.parse(res_text)
 
-        print(f"generate_quiz - res: {res}")
+        print(f"generate_quiz - {topic_id} - res: {res}")
 
         for question in res.questions:
             print(question)
@@ -114,14 +114,14 @@ Make sure that all output is in the same language as the input text (all field v
             }
         )
 
-        print("generate_quiz - done")
+        print("generate_quiz - {topic_id} - done")
 
         return {"done": True}
 
     except Exception as error:
         error_name = type(error).__name__
         print(
-            f"generate_quiz - Error while generating quiz: {error_name} {error} {error.__traceback__}"
+            f"generate_quiz - {topic_id} - Error while generating quiz: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
             {"quizStatus": f"error: {error_name}"}
