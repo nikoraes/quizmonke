@@ -4,32 +4,21 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quizmonke/auth/decorations.dart';
 import 'package:quizmonke/auth/policy_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home/home_screen.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
-import 'package:quizmonke/summary/summary_screen.dart';
+import 'package:quizmonke/utils/markdown_screen.dart';
 
 import 'config.dart';
-
-/* final actionCodeSettings = ActionCodeSettings(
-  url: 'https://schoolscan-4c8d8.firebaseapp.com',
-  handleCodeInApp: true,
-  androidMinimumVersion: '1',
-  androidPackageName: 'com.raes.quizmonke',
-  iOSBundleId: 'com.raes.quizmonke',
-);
-
-final emailLinkProviderConfig = EmailLinkAuthProvider(
-  actionCodeSettings: actionCodeSettings,
-);
-*/
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
@@ -96,6 +85,15 @@ class App extends StatelessWidget {
 
     return MaterialApp(
       title: 'QuizMonke',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+      ],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -118,8 +116,6 @@ class App extends StatelessWidget {
         // LoginScreen.routeName: (context) => const LoginScreen(),
         // Quiz (probably shouldn't be named)
         QuizScreen.routeName: (context) => const QuizScreen(),
-        // Summary (probably shouldn't be named)
-        SummaryScreen.routeName: (context) => const SummaryScreen(),
 
         '/sign-in': (context) {
           return SignInScreen(

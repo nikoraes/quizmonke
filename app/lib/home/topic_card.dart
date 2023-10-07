@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
-import 'package:quizmonke/summary/summary_screen.dart';
+import 'package:quizmonke/utils/markdown_screen.dart';
 
 Future<void> deleteTopic(String topicId) async {
   final batch = FirebaseFirestore.instance.batch();
@@ -101,6 +102,28 @@ class TopicCard extends StatefulWidget {
     this.summaryStatus,
     this.outlineStatus,
   });
+
+  factory TopicCard.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    String id = snapshot.id;
+    return TopicCard(
+      id: id,
+      name: data?['name'],
+      description: data?['description'],
+      status: data?['status'],
+      tags: data?['tags'] is Iterable ? List.from(data?['tags']) : null,
+      extractStatus: data?['extractStatus'],
+      quizStatus: data?['quizStatus'],
+      summaryStatus: data?['summaryStatus'],
+      summary: data?['summary'],
+      outlineStatus: data?['outlineStatus'],
+      outline: data?['outline'],
+    );
+  }
+
   @override
   _TopicCardState createState() => _TopicCardState();
 }
@@ -170,17 +193,30 @@ class _TopicCardState extends State<TopicCard>
     }
 
     void openSummary(String id, String summary) {
-      // TODO: make generic markdown screen
-      Navigator.pushNamed(context, SummaryScreen.routeName,
-          arguments: SummaryArguments(id, "${widget.name}", summary));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MarkdownScreen(
+            title: '${widget.name}',
+            markdown: summary,
+          ),
+        ),
+      );
       FirebaseAnalytics.instance.logEvent(name: "open_summary", parameters: {
         "topic_id": id,
       });
     }
 
     void openOutline(String id, String outline) {
-      Navigator.pushNamed(context, SummaryScreen.routeName,
-          arguments: SummaryArguments(id, "${widget.name}", outline));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MarkdownScreen(
+            title: '${widget.name}',
+            markdown: outline,
+          ),
+        ),
+      );
       FirebaseAnalytics.instance.logEvent(name: "open_outline", parameters: {
         "topic_id": id,
       });
@@ -191,21 +227,21 @@ class _TopicCardState extends State<TopicCard>
         context: parentContext,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('Delete topic!'),
-            content: const Text('Are you sure?'),
+            title: Text(AppLocalizations.of(context)!.deleteTopic),
+            content: Text(AppLocalizations.of(context)!.areYouSure),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(parentContext);
                 },
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () {
                   deleteTopic(topicId);
                   Navigator.pop(parentContext);
                 },
-                child: const Text('Delete'),
+                child: Text(AppLocalizations.of(context)!.delete),
               ),
             ],
           );
@@ -226,30 +262,29 @@ class _TopicCardState extends State<TopicCard>
               }
             },
             icon: const Icon(Icons.more_vert),
-            tooltip: 'Show menu',
           );
         },
         menuChildren: [
           MenuItemButton(
-            child: const Text('Generate Quiz'),
+            child: Text(AppLocalizations.of(context)!.generateQuiz),
             onPressed: () {
               generateQuiz(widget.id);
             },
           ),
           MenuItemButton(
-            child: const Text('Generate Summary'),
+            child: Text(AppLocalizations.of(context)!.generateSummary),
             onPressed: () {
               generateSummary(widget.id);
             },
           ),
           MenuItemButton(
-            child: const Text('Generate Outline'),
+            child: Text(AppLocalizations.of(context)!.generateOutline),
             onPressed: () {
               generateOutline(widget.id);
             },
           ),
           MenuItemButton(
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
             onPressed: () {
               showDeleteDialog(context, widget.id);
             },
@@ -269,7 +304,7 @@ class _TopicCardState extends State<TopicCard>
               Expanded(
                 // Wrap the Text widget with Expanded
                 child: Text(
-                  widget.name ?? 'Loading...',
+                  widget.name ?? AppLocalizations.of(context)!.loading,
                   style: Theme.of(context).textTheme.titleMedium,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

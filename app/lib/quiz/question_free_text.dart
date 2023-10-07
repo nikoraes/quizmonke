@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
@@ -35,23 +36,23 @@ class _QuestionFreeTextState extends State<QuestionFreeText> {
         // Free Text Input
         TextFormField(
           controller: answerController,
-          decoration: const InputDecoration(
-            labelText: 'Your Answer',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.yourAnswer,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 20),
         // Check Answer Button
         ElevatedButton(
           onPressed: () => _checkAnswer(),
-          child: const Text('Check Answer'),
+          child: Text(AppLocalizations.of(context)!.checkAnswer),
         ),
         // Skip Button
         TextButton(
           onPressed: () {
             widget.onAnswerChecked(QuestionResult.skipped);
           },
-          child: const Text('Skip'),
+          child: Text(AppLocalizations.of(context)!.skip),
         ),
       ],
     );
