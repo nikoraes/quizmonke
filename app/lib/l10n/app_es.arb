@@ -1,0 +1,62 @@
+{
+    "quiz": "Quiz",
+    "summary": "Resumen",
+    "outline": "Esquema",
+    "preview": "Vista previa",
+    "generateQuiz": "Generar Quiz",
+    "generateSummary": "Generar Resumen",
+    "generateOutline": "Generar Esquema",
+    "nextQuestion": "Siguiente Pregunta",
+    "congratulations": "¡Felicidades!",
+    "answerCorrect": "¡Tu respuesta es correcta!",
+    "bluh": "¡Bluh!",
+    "answerWrong": "¡Tu respuesta es incorrecta! La respuesta correcta es {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Respuesta correcta"
+            }
+        }
+    },
+    "yourAnswer": "Tu respuesta",
+    "skip": "Saltar",
+    "skipped": "¡Saltada!",
+    "answerSkipped": "¡Has saltado esta pregunta! La respuesta correcta es {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Respuesta correcta"
+            }
+        }
+    },
+    "tryAgain": "Intentar de nuevo",
+    "checkAnswer": "Verificar respuesta",
+    "quizCompleted": "¡Quiz completado!",
+    "resultsOverview": "Resumen de resultados:",
+    "correctLabel": "Correctas:",
+    "wrongLabel": "Incorrectas:",
+    "skippedLabel": "Saltadas:",
+    "generateMore": "Generar más",
+    "back": "Volver",
+    "done": "Hecho",
+    "account": "Cuenta",
+    "deleteTopic": "¡Eliminar Tema!",
+    "areYouSure": "¿Estás seguro?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "loading": "Cargando...",
+    "oops": "¡Ups! Algo salió mal. Por favor, inténtalo de nuevo más tarde.",
+    "welcomeText": "¡Bienvenido a QuizMonke!",
+    "noTopicsText": "Parece que aún no has creado ningún tema. ¡Comienza escaneando algunos textos y QuizMonke te ayudará a convertirlos en cuestionarios, resúmenes y más!",
+    "unsupportedQuestion": "Tipo de pregunta no admitido: {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "Tipo_incorrectamente_formateado"
+            }
+        }
+    }
+}

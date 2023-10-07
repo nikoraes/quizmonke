@@ -1,0 +1,62 @@
+{
+    "quiz": "Quiz",
+    "summary": "Resumo",
+    "outline": "Esboço",
+    "preview": "Visualização",
+    "generateQuiz": "Gerar Quiz",
+    "generateSummary": "Gerar Resumo",
+    "generateOutline": "Gerar Esboço",
+    "nextQuestion": "Próxima Pergunta",
+    "congratulations": "Parabéns!",
+    "answerCorrect": "Sua resposta está correta!",
+    "bluh": "Bluh!",
+    "answerWrong": "Sua resposta está incorreta! A resposta correta é {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Resposta correta"
+            }
+        }
+    },
+    "yourAnswer": "Sua resposta",
+    "skip": "Pular",
+    "skipped": "Pulado!",
+    "answerSkipped": "Você pulou esta pergunta! A resposta correta é {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Resposta correta"
+            }
+        }
+    },
+    "tryAgain": "Tentar Novamente",
+    "checkAnswer": "Verificar Resposta",
+    "quizCompleted": "Quiz concluído!",
+    "resultsOverview": "Visão Geral dos Resultados:",
+    "correctLabel": "Corretas:",
+    "wrongLabel": "Incorretas:",
+    "skippedLabel": "Puladas:",
+    "generateMore": "Gerar mais",
+    "back": "Voltar",
+    "done": "Concluído",
+    "account": "Conta",
+    "deleteTopic": "Excluir Tópico!",
+    "areYouSure": "Tem certeza?",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "loading": "Carregando...",
+    "oops": "Ops! Algo deu errado. Por favor, tente novamente mais tarde.",
+    "welcomeText": "Bem-vindo ao QuizMonke!",
+    "noTopicsText": "Parece que você ainda não criou nenhum tópico. Comece escaneando alguns textos e o QuizMonke ajudará você a transformá-los em questionários, resumos e mais!",
+    "unsupportedQuestion": "Tipo de pergunta não suportado: {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "Tipo_incorretamente_formatado"
+            }
+        }
+    }
+}

@@ -16,7 +16,6 @@ import 'package:quizmonke/auth/policy_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home/home_screen.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
-import 'package:quizmonke/utils/markdown_screen.dart';
 
 import 'config.dart';
 
@@ -92,7 +91,13 @@ class App extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('en'), // English
+        Locale('en'),
+        Locale('nl'),
+        Locale('fr'),
+        Locale('de'),
+        Locale('es'),
+        Locale('it'),
+        Locale('pt'),
       ],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

@@ -1,0 +1,62 @@
+{
+    "quiz": "Quiz",
+    "summary": "Résumé",
+    "outline": "Plan",
+    "preview": "Aperçu",
+    "generateQuiz": "Générer un Quiz",
+    "generateSummary": "Générer un Résumé",
+    "generateOutline": "Générer un Plan",
+    "nextQuestion": "Question suivante",
+    "congratulations": "Félicitations !",
+    "answerCorrect": "Votre réponse est correcte !",
+    "bluh": "Bluh !",
+    "answerWrong": "Votre réponse est incorrecte ! La réponse correcte est {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Réponse correcte"
+            }
+        }
+    },
+    "yourAnswer": "Votre réponse",
+    "skip": "Passer",
+    "skipped": "Passé !",
+    "answerSkipped": "Vous avez sauté cette question ! La réponse correcte est {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Réponse correcte"
+            }
+        }
+    },
+    "tryAgain": "Réessayer",
+    "checkAnswer": "Vérifier la réponse",
+    "quizCompleted": "Quiz terminé !",
+    "resultsOverview": "Aperçu des résultats :",
+    "correctLabel": "Correct :",
+    "wrongLabel": "Incorrect :",
+    "skippedLabel": "Passé :",
+    "generateMore": "Générer plus",
+    "back": "Retour",
+    "done": "Terminé",
+    "account": "Compte",
+    "deleteTopic": "Supprimer le Sujet !",
+    "areYouSure": "Êtes-vous sûr(e) ?",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "loading": "Chargement...",
+    "oops": "Oups ! Quelque chose s'est mal passé. Veuillez réessayer plus tard.",
+    "welcomeText": "Bienvenue dans QuizMonke !",
+    "noTopicsText": "Il semble que vous n'ayez pas encore créé de sujets. Commencez par scanner quelques textes, et QuizMonke vous aidera à les transformer en quiz, résumés et plus encore !",
+    "unsupportedQuestion": "Type de question non pris en charge : {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "type_mal_formaté"
+            }
+        }
+    }
+}

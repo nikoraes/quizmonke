@@ -1,0 +1,62 @@
+{
+    "quiz": "Quiz",
+    "summary": "Sommario",
+    "outline": "Struttura",
+    "preview": "Anteprima",
+    "generateQuiz": "Genera Quiz",
+    "generateSummary": "Genera Sommario",
+    "generateOutline": "Genera Struttura",
+    "nextQuestion": "Prossima Domanda",
+    "congratulations": "Congratulazioni!",
+    "answerCorrect": "La tua risposta è corretta!",
+    "bluh": "Bluh!",
+    "answerWrong": "La tua risposta è errata! La risposta corretta è {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Risposta corretta"
+            }
+        }
+    },
+    "yourAnswer": "La tua risposta",
+    "skip": "Salta",
+    "skipped": "Saltato!",
+    "answerSkipped": "Hai saltato questa domanda! La risposta corretta è {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Risposta corretta"
+            }
+        }
+    },
+    "tryAgain": "Prova di nuovo",
+    "checkAnswer": "Controlla la Risposta",
+    "quizCompleted": "Quiz completato!",
+    "resultsOverview": "Panoramica dei Risultati:",
+    "correctLabel": "Corrette:",
+    "wrongLabel": "Errate:",
+    "skippedLabel": "Saltate:",
+    "generateMore": "Genera altro",
+    "back": "Indietro",
+    "done": "Fatto",
+    "account": "Account",
+    "deleteTopic": "Elimina Argomento!",
+    "areYouSure": "Sei sicuro?",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "loading": "Caricamento...",
+    "oops": "Ops! Qualcosa è andato storto. Per favore, riprova più tardi.",
+    "welcomeText": "Benvenuto su QuizMonke!",
+    "noTopicsText": "Sembra che tu non abbia ancora creato nessun argomento. Inizia scansionando alcuni testi e QuizMonke ti aiuterà a trasformarli in quiz, riassunti e altro!",
+    "unsupportedQuestion": "Tipo di domanda non supportato: {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "Tipo_incorrettamente_formatato"
+            }
+        }
+    }
+}
