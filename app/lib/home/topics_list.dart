@@ -82,7 +82,24 @@ class TopicsListState extends State<TopicsList> {
                     snapshot as DocumentSnapshot<Map<String, dynamic>>, null);
               })
               .toList()
-              .cast(),
+              .cast<TopicCard>()
+            ..sort((a, b) {
+              // Get timestamps if available
+              Timestamp? timestampA = a.timestamp;
+              Timestamp? timestampB = b.timestamp;
+
+              // Handle cases where timestamps are null or missing
+              if (timestampA == null && timestampB == null) {
+                return 0; // No preference when both are missing
+              } else if (timestampA == null) {
+                return 1; // Move items with missing timestamp to the end
+              } else if (timestampB == null) {
+                return -1; // Move items with missing timestamp to the end
+              } else {
+                // Compare timestamps in descending order
+                return timestampB.seconds.compareTo(timestampA.seconds);
+              }
+            }),
         );
       },
     );

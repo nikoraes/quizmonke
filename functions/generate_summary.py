@@ -21,7 +21,7 @@ def generate_summary(topic_id: str):
         for document in files:
             fulltext += document.get("text") + "\n"
 
-        prompt_template = """Generate a summary of the provided input text. The summary should help to memorize the content of the provided input text. Use multiple paragraphs to improve readability. The generated summary must be in the same language as the input text.
+        prompt_template = """Generate a summary of the provided input text. The summary should help to memorize the content of the provided input text. Use multiple paragraphs to improve readability. The generated summary must be in the same language as the input text!
 
 INPUT: "{text}"
 

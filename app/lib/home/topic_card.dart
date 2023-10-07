@@ -87,6 +87,7 @@ class TopicCard extends StatefulWidget {
   final String? quizStatus;
   final String? summaryStatus;
   final String? outlineStatus;
+  final Timestamp? timestamp;
 
   const TopicCard({
     super.key,
@@ -101,6 +102,7 @@ class TopicCard extends StatefulWidget {
     this.quizStatus,
     this.summaryStatus,
     this.outlineStatus,
+    this.timestamp,
   });
 
   factory TopicCard.fromFirestore(
@@ -121,6 +123,7 @@ class TopicCard extends StatefulWidget {
       summary: data?['summary'],
       outlineStatus: data?['outlineStatus'],
       outline: data?['outline'],
+      timestamp: data?['timestamp'],
     );
   }
 
@@ -380,6 +383,7 @@ class _TopicCardState extends State<TopicCard>
                                       ),
                                     ),
                           title: Text(AppLocalizations.of(context)!.quiz),
+                          enabled: widget.quizStatus == "done",
                           onTap: () {
                             openQuiz(widget.id);
                           },
@@ -407,6 +411,7 @@ class _TopicCardState extends State<TopicCard>
                           title: Row(
                             children: [
                               Text(AppLocalizations.of(context)!.summary),
+                              const Text(' '),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label:
@@ -418,8 +423,8 @@ class _TopicCardState extends State<TopicCard>
                               )
                             ],
                           ),
+                          enabled: widget.summary != null,
                           onTap: () {
-                            if (widget.summary == null) return;
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
@@ -446,9 +451,10 @@ class _TopicCardState extends State<TopicCard>
                           title: Row(
                             children: [
                               Text(AppLocalizations.of(context)!.outline),
+                              const Text(' '),
                               Badge(
-                                alignment: Alignment.topLeft,
-                                offset: const Offset(6, -4),
+                                // alignment: Alignment.topLeft,
+                                //offset: const Offset(15, -4),
                                 label:
                                     Text(AppLocalizations.of(context)!.preview),
                                 backgroundColor:
@@ -458,6 +464,7 @@ class _TopicCardState extends State<TopicCard>
                               )
                             ],
                           ),
+                          enabled: widget.outline != null,
                           onTap: () {
                             if (widget.outline == null) return;
                             openSummary(widget.id, '${widget.outline}');

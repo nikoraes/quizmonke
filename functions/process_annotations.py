@@ -50,6 +50,6 @@ def process_annotations(
             f"process_annotations - Error while processing annotations: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
-            {"status": f"error: {error_name}"}
+            {"extractStatus": f"error: {error_name}"}
         )
         return None
