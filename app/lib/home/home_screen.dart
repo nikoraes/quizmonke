@@ -110,7 +110,7 @@ Future<void> onImagesCaptured(List<MediaModel> images) async {
   if (images.isEmpty) return;
 
   final newTopic = {
-    "extractStatus": "uploading",
+    "status": "uploading",
     "roles": {FirebaseAuth.instance.currentUser?.uid: "owner"},
     "timestamp": Timestamp.now()
   };
@@ -146,7 +146,8 @@ Future<void> onImagesCaptured(List<MediaModel> images) async {
     print("Response: $response");
   } on FirebaseFunctionsException catch (error) {
     documentSnapshot.update({
-      "extractStatus": "${error.code} - ${error.message} - ${error.details}"
+      "extractStatus":
+          "error: ${error.code} - ${error.message} - ${error.details}"
     });
 
     print("error code: ${error.code}");

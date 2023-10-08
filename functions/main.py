@@ -35,6 +35,7 @@ def process_annotations_fn(
         return
     print(f"process_annotations_fn - Annotations processed: {topic_id}")
 
+    # This also extracts the language, which is needed for the others
     def topic_details_thread():
         topic_details_res = generate_topic_details(topic_id)
         if topic_details_res["done"]:

@@ -48,4 +48,4 @@ def batch_annotate(req: https_fn.CallableRequest) -> Any:
         firestore_client.collection("topics").document(topic_id).update(
             {"status": f"error: {error_name}"}
         )
-        return {"done": False, "extractStatus": f"error: {error_name}"}
+        return {"done": False, "status": f"error: {error_name}"}

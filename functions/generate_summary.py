@@ -14,14 +14,16 @@ def generate_summary(topic_id: str):
     try:
         topic_ref = firestore_client.collection("topics").document(topic_id)
         topic_ref.update({"summaryStatus": "generating"})
+        language = topic_ref.get(field_paths={"language"}).to_dict().get("language")
 
         files = firestore_client.collection(f"topics/{topic_id}/files").stream()
 
         fulltext = ""
         for document in files:
-            fulltext += document.get("text") + "\n"
+            fulltext += document.get("text")
 
-        prompt_template = """Summarize the provided INPUT. Detect the language of the INPUT and make sure that the generated SUMMARY is in the same language!
+        prompt_template = """Generate a summary for the provided INPUT. Use multiple paragraphs. Emphasize important words (in markdown).
+The generated summary must be in the following language: "{language}"
 
 INPUT: "{text}"
 
@@ -29,9 +31,9 @@ SUMMARY:"""
 
         prompt = PromptTemplate(
             template=prompt_template,
-            input_variables=["text"],
+            input_variables=["text", "language"],
         )
-        final_prompt = prompt.format(text=fulltext)
+        final_prompt = prompt.format(text=fulltext, language=language)
         print(f"generate_summary - {topic_id} - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")

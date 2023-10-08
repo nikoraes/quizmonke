@@ -58,5 +58,6 @@
                 "example": "type_mal_formaté"
             }
         }
-    }
+    },
+    "error": "Erreur"
 }

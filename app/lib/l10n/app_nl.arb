@@ -3,9 +3,9 @@
     "summary": "Samenvatting",
     "outline": "Overzicht",
     "preview": "Voorbeeld",
-    "generateQuiz": "Genereer Quiz",
-    "generateSummary": "Genereer Samenvatting",
-    "generateOutline": "Genereer Overzicht",
+    "generateQuiz": "Genereer quiz",
+    "generateSummary": "Genereer samenvatting",
+    "generateOutline": "Genereer overzicht",
     "nextQuestion": "Volgende Vraag",
     "congratulations": "Gefeliciteerd!",
     "answerCorrect": "Uw antwoord is correct!",
@@ -58,5 +58,6 @@
                 "example": "verkeerd_geformatteerd_type"
             }
         }
-    }
+    },
+    "error": "Fout"
 }

@@ -58,5 +58,6 @@
                 "example": "Tipo_incorrettamente_formatato"
             }
         }
-    }
+    },
+    "error": "Errore"
 }

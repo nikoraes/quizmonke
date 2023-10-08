@@ -14,41 +14,22 @@ def generate_outline(topic_id: str):
     try:
         topic_ref = firestore_client.collection("topics").document(topic_id)
         topic_ref.update({"outlineStatus": "generating"})
+        language = topic_ref.get(field_paths={"language"}).to_dict().get("language")
 
         files = firestore_client.collection(f"topics/{topic_id}/files").stream()
 
         fulltext = ""
         for document in files:
-            fulltext += document.get("text") + "\n"
+            fulltext += document.get("text")
 
         prompt_template = """Generate a structured OUTLINE (in markdown) for the provided INPUT. 
-Detect the language of the INPUT and make sure that the generated OUTLINE is in the same language!
 
-Here's a sample of a structured OUTLINE format: "
-## I. Astronaut's Perspective
+The OUTLINE should have the following format:
+-**First topic title**
+   - Subtitle
+      - Short description of this part (about 100 characters)
 
-   A. Embracing the Unknown
-
-      1. Facing Fear
-         - Astronaut's initial apprehensions
-         - **Overcoming Fear:** Emphasize the courage needed
-
-      2. View from Space
-         - Describe the awe-inspiring experience
-         - _Unforgettable Moment:_ Highlight a specific view
-
-   B. Life in Zero Gravity
-
-      1. Adaptation
-         - Discuss challenges of living without gravity
-         - `Scientific Insight:` Brief explanation of zero gravity effects
-
-## II. Celestial Phenomena
-
-   A. Solar System Exploration
-
-      1. Martian Landscape
-         - Overview of Mars exploration"
+The generated outline must be in the following language: "{language}"
 
 INPUT: "{text}"
 
@@ -56,9 +37,9 @@ OUTLINE:"""
 
         prompt = PromptTemplate(
             template=prompt_template,
-            input_variables=["text"],
+            input_variables=["text", "language"],
         )
-        final_prompt = prompt.format(text=fulltext)
+        final_prompt = prompt.format(text=fulltext, language=language)
         print(f"generate_outline - {topic_id} - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")

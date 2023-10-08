@@ -49,7 +49,7 @@ def generate_quiz(topic_id: str):
 
         fulltext = ""
         for document in files:
-            fulltext += document.get("text") + "\n"
+            fulltext += document.get("text")
 
         template = """You are a world class algorithm for generating quizzes in a structured format.
 

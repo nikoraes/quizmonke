@@ -37,7 +37,7 @@ def generate_topic_details(topic_id: str):
 
         fulltext = ""
         for document in files:
-            fulltext += document.get("text") + "\n"
+            fulltext += document.get("text")
 
         prompt_template = """Detect the language, generate a name, a short description and a list of tags for the provided input. Everything should be in the same language as the input.
 

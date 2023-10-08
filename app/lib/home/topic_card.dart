@@ -268,24 +268,27 @@ class _TopicCardState extends State<TopicCard>
           );
         },
         menuChildren: [
-          MenuItemButton(
-            child: Text(AppLocalizations.of(context)!.generateQuiz),
-            onPressed: () {
-              generateQuiz(widget.id);
-            },
-          ),
-          MenuItemButton(
-            child: Text(AppLocalizations.of(context)!.generateSummary),
-            onPressed: () {
-              generateSummary(widget.id);
-            },
-          ),
-          MenuItemButton(
-            child: Text(AppLocalizations.of(context)!.generateOutline),
-            onPressed: () {
-              generateOutline(widget.id);
-            },
-          ),
+          if (widget.extractStatus == 'done')
+            MenuItemButton(
+              child: Text(AppLocalizations.of(context)!.generateQuiz),
+              onPressed: () {
+                generateQuiz(widget.id);
+              },
+            ),
+          if (widget.extractStatus == 'done')
+            MenuItemButton(
+              child: Text(AppLocalizations.of(context)!.generateSummary),
+              onPressed: () {
+                generateSummary(widget.id);
+              },
+            ),
+          if (widget.extractStatus == 'done')
+            MenuItemButton(
+              child: Text(AppLocalizations.of(context)!.generateOutline),
+              onPressed: () {
+                generateOutline(widget.id);
+              },
+            ),
           MenuItemButton(
             child: Text(AppLocalizations.of(context)!.delete),
             onPressed: () {
@@ -304,10 +307,33 @@ class _TopicCardState extends State<TopicCard>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
+              // Progress Indicator or Alert Icon based on extractStatus
+              (widget.extractStatus != null &&
+                          widget.extractStatus!.contains('error')) ||
+                      (widget.status != null &&
+                          widget.status!.contains('error'))
+                  ? const Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                      ),
+                    )
+                  : (widget.status != 'done' && widget.extractStatus != 'done')
+                      ? const Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      : Container(), // Placeholder for no error or loading state
               Expanded(
-                // Wrap the Text widget with Expanded
                 child: Text(
-                  widget.name ?? AppLocalizations.of(context)!.loading,
+                  widget.name ??
+                      (((widget.extractStatus != null &&
+                                  widget.extractStatus!.contains('error')) ||
+                              (widget.status != null &&
+                                  widget.status!.contains('error')))
+                          ? AppLocalizations.of(context)!.error
+                          : AppLocalizations.of(context)!.loading),
                   style: Theme.of(context).textTheme.titleMedium,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -318,6 +344,17 @@ class _TopicCardState extends State<TopicCard>
             ],
           ),
           const SizedBox(height: 4),
+          if (widget.status != null && widget.status!.contains('error'))
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(widget.status!),
+            ),
+          if (widget.extractStatus != null &&
+              widget.extractStatus!.contains('error'))
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(widget.extractStatus!),
+            ),
           if (widget.description != null)
             Align(
               alignment: Alignment.topLeft,
