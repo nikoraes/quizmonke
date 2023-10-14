@@ -41,8 +41,9 @@ class _QuestionMultipleChoiceState extends State<QuestionMultipleChoice> {
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color:
-                          currentAnswer == choice ? Colors.blue : Colors.grey,
+                      color: currentAnswer == choice
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

@@ -1,4 +1,5 @@
 {
+    "@@locale": "pt",
     "quiz": "Quiz",
     "summary": "Resumo",
     "outline": "Esboço",
@@ -59,5 +60,9 @@
             }
         }
     },
-    "error": "Erro"
+    "error": "Erro",
+    "questionTooHard": "Pergunta muito difícil",
+    "questionTooSimple": "Pergunta muito simples",
+    "incorrectCorrectAnswer": "Resposta correta incorreta",
+    "other": "Outro"
 }

@@ -105,9 +105,7 @@ class App extends StatelessWidget {
       ],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromRGBO(9, 9, 9, 1),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD2A060)),
         textTheme: GoogleFonts.latoTextTheme(),
         useMaterial3: true,
         inputDecorationTheme: const InputDecorationTheme(
@@ -120,11 +118,7 @@ class App extends StatelessWidget {
       navigatorObservers: <NavigatorObserver>[observer],
       initialRoute: initialRoute,
       routes: {
-        // Home (topics list)
         HomeScreen.routeName: (context) => const HomeScreen(),
-        // LoginScreen.routeName: (context) => const LoginScreen(),
-        // Quiz (probably shouldn't be named)
-        QuizScreen.routeName: (context) => const QuizScreen(),
         '/sign-in': buildSignInScreen(context),
         '/verify-email': buildEmailVerificationScreen(context),
         '/forgot-password': buildForgotPasswordScreen(context),

@@ -1,4 +1,5 @@
 {
+    "@@locale": "nl",
     "quiz": "Quiz",
     "summary": "Samenvatting",
     "outline": "Overzicht",
@@ -59,5 +60,9 @@
             }
         }
     },
-    "error": "Fout"
+    "error": "Fout",
+    "questionTooHard": "Vraag te moeilijk",
+    "questionTooSimple": "Vraag te eenvoudig",
+    "incorrectCorrectAnswer": "Onjuist correct antwoord",
+    "other": "Anders"
 }

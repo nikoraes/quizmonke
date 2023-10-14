@@ -9,27 +9,24 @@ import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/question_multiple_choice.dart';
 import 'package:quizmonke/quiz/question_multiple_choice_multi.dart';
 
-class QuizArguments {
+enum QuestionResult { correct, wrong, skipped }
+
+class QuizScreen extends StatefulWidget {
   final String topicId;
   final String topicName;
   final List<QuestionItem> questions;
 
-  QuizArguments(this.topicId, this.topicName, this.questions);
-}
-
-enum QuestionResult { correct, wrong, skipped }
-
-class QuizScreen extends StatefulWidget {
-  // TODO: we should probably have the topic id as a param and retrieve all questions here
-  static String routeName = '/quiz';
-  const QuizScreen({super.key});
+  const QuizScreen(
+      {super.key,
+      required this.topicId,
+      required this.topicName,
+      required this.questions});
 
   @override
   _QuizScreenState createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late String topicId;
   late List<QuestionItem> questions;
   int currentIndex = 0;
 
@@ -42,6 +39,9 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    setState(() {
+      questions = widget.questions;
+    });
   }
 
   void _moveToHome() {
@@ -136,43 +136,96 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void showSkippedAnswerScreen(
       BuildContext parentContext, QuestionItem questionItem) {
+    // Variables to track selected issue and whether the 'Delete' button is enabled
+    String selectedIssue = '';
+    bool isDeleteButtonEnabled = false;
+    nextQuestion() {
+      setState(() {
+        currentIndex++; // Move to the next question
+      });
+    }
+
     // Show dialog
     showDialog(
       context: parentContext,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.skipped),
-          // Add something to provide feedback on why it was skipped (and potentially remove the question from the quiz)
-          content: Text(AppLocalizations.of(context)!
-              .answerSkipped('${questionItem.answer}')),
-          actions: [
-            TextButton(
-              onPressed: () {
-                print('currentIndex: $currentIndex / ${questions.length}');
-                // Move to the next question if there are more questions
-                setState(() {
-                  currentIndex++; // Move to the next question
-                });
-                Navigator.pop(parentContext);
-              },
-              child: Text(AppLocalizations.of(context)!.nextQuestion),
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.skipped),
+            // Add something to provide feedback on why it was skipped (and potentially remove the question from the quiz)
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppLocalizations.of(context)!
+                    .answerSkipped('${questionItem.answer}')),
+                const SizedBox(height: 16),
+                // List of radio buttons for potential issues
+                for (String issue in [
+                  AppLocalizations.of(context)!.questionTooHard,
+                  AppLocalizations.of(context)!.questionTooSimple,
+                  AppLocalizations.of(context)!.incorrectCorrectAnswer,
+                  AppLocalizations.of(context)!.other
+                ])
+                  RadioListTile(
+                    title: Text(issue),
+                    value: issue,
+                    groupValue: selectedIssue,
+                    dense: true,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedIssue = value.toString();
+                        isDeleteButtonEnabled = true;
+                      });
+                    },
+                  ),
+              ],
             ),
-          ],
-        );
+            actions: [
+              ElevatedButton(
+                onPressed: isDeleteButtonEnabled
+                    ? () {
+                        if (isDeleteButtonEnabled) {
+                          // TODO:  Add logic to delete the question and move to the next question
+                          print('Delete question with issue: $selectedIssue');
+                          nextQuestion();
+                          Navigator.pop(parentContext);
+                        }
+                      }
+                    : null,
+                child: Text(
+                  AppLocalizations.of(context)!.delete,
+                  style: TextStyle(
+                    color: isDeleteButtonEnabled
+                        ? Theme.of(context).colorScheme.onError
+                        : Colors.grey,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Move to the next question if there are more questions
+                  nextQuestion();
+                  Navigator.pop(parentContext);
+                },
+                child: Text(AppLocalizations.of(context)!.nextQuestion),
+              ),
+            ],
+          );
+        });
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as QuizArguments;
+    /* final args = ModalRoute.of(context)!.settings.arguments as QuizArguments;
     questions = args.questions;
-    topicId = args.topicId;
+    topicId = args.topicId; */
 
     void onAnswerChecked(QuestionItem questionItem, QuestionResult result) {
       FirebaseAnalytics.instance
           .logEvent(name: "quiz_answer_checked", parameters: {
-        "topic_id": topicId,
+        "topic_id": widget.topicId,
         "question_id": questionItem.id,
         "result": QuestionResult.correct.name,
       });
@@ -196,13 +249,13 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${args.topicName} - $currentIndex/${questions.length}'),
+        title: Text('${widget.topicName} - $currentIndex/${questions.length}'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: (currentIndex < questions.length)
             ? _buildQuestion(context, ValueKey(questions[currentIndex]),
-                topicId, questions[currentIndex], (correct) {
+                widget.topicId, questions[currentIndex], (correct) {
                 onAnswerChecked(questions[currentIndex], correct);
               })
             : Align(
@@ -231,6 +284,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     Text(
                         '${AppLocalizations.of(context)!.skippedLabel} $numberSkipped'),
                     const SizedBox(height: 20),
+                    // TODO: allow to generate more
                     /* ElevatedButton(
                       onPressed: () {
                         generateQuiz(topicId);
