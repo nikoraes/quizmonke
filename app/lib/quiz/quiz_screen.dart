@@ -1,6 +1,8 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:quizmonke/ad_helper.dart';
 import 'package:quizmonke/quiz/question_connect_terms.dart';
 import 'package:quizmonke/quiz/question_free_text.dart';
 import 'package:quizmonke/quiz/question_item.dart';
@@ -35,9 +37,38 @@ class _QuizScreenState extends State<QuizScreen> {
   int numberWrong = 0;
   int numberSkipped = 0;
 
+  InterstitialAd? _interstitialAd;
+
   @override
   void initState() {
     super.initState();
+  }
+
+  void _moveToHome() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  void _loadInterstitialAd(Function onAdDismissed) {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              onAdDismissed();
+            },
+          );
+
+          setState(() {
+            _interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          debugPrint('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
   }
 
   void showCongratulatoryScreen(BuildContext parentContext) {
@@ -213,8 +244,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     const SizedBox(height: 10),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
+                        // if(user.isProUser) _moveToHome()
+                        _loadInterstitialAd(_moveToHome);
                       },
                       child: Text(AppLocalizations.of(context)!.back),
                     ),
@@ -223,6 +254,14 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose the InterstitialAd object
+    _interstitialAd?.dispose();
+
+    super.dispose();
   }
 }
 
