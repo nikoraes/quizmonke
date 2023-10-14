@@ -105,6 +105,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void showSkippedAnswerScreen(
       BuildContext parentContext, QuestionItem questionItem) {
+    // Variables to track selected issue and whether the 'Delete' button is enabled
+    String selectedIssue = '';
+    bool isDeleteButtonEnabled = false;
     // Show dialog
     showDialog(
       context: parentContext,
@@ -112,12 +115,55 @@ class _QuizScreenState extends State<QuizScreen> {
         return AlertDialog(
           title: Text(AppLocalizations.of(context)!.skipped),
           // Add something to provide feedback on why it was skipped (and potentially remove the question from the quiz)
-          content: Text(AppLocalizations.of(context)!
-              .answerSkipped('${questionItem.answer}')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(AppLocalizations.of(context)!
+                  .answerSkipped('${questionItem.answer}')),
+              const SizedBox(height: 16),
+              // List of radio buttons for potential issues
+              for (String issue in [
+                AppLocalizations.of(context)!.questionTooHard,
+                AppLocalizations.of(context)!.questionTooSimple,
+                AppLocalizations.of(context)!.incorrectCorrectAnswer,
+                AppLocalizations.of(context)!.other
+              ])
+                RadioListTile(
+                  title: Text(issue),
+                  value: issue,
+                  groupValue: selectedIssue,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedIssue = value.toString();
+                      isDeleteButtonEnabled = true;
+                    });
+                  },
+                ),
+            ],
+          ),
           actions: [
+            ElevatedButton(
+              onPressed: () {
+                if (isDeleteButtonEnabled) {
+                  // TODO:  Add logic to delete the question and move to the next question
+                  print('Delete question with issue: $selectedIssue');
+                  setState(() {
+                    currentIndex++; // Move to the next question
+                  });
+                  Navigator.pop(parentContext);
+                }
+              },
+              child: Text(
+                AppLocalizations.of(context)!.delete,
+                style: TextStyle(
+                  color: isDeleteButtonEnabled
+                      ? Theme.of(context).colorScheme.onError
+                      : Colors.grey,
+                ),
+              ),
+            ),
             TextButton(
               onPressed: () {
-                print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
                 setState(() {
                   currentIndex++; // Move to the next question
