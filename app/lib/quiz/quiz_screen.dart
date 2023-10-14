@@ -253,6 +253,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     Text(
                         '${AppLocalizations.of(context)!.skippedLabel} $numberSkipped'),
                     const SizedBox(height: 20),
+                    // TODO: allow to generate more
                     /* ElevatedButton(
                       onPressed: () {
                         generateQuiz(topicId);

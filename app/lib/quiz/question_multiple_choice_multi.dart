@@ -51,7 +51,9 @@ class _QuestionMultipleChoiceMultiState
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.blue : Colors.grey,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

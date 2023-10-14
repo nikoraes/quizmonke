@@ -101,9 +101,7 @@ class App extends StatelessWidget {
       ],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromRGBO(9, 9, 9, 1),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD2A060)),
         textTheme: GoogleFonts.latoTextTheme(),
         useMaterial3: true,
         inputDecorationTheme: const InputDecorationTheme(
