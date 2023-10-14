@@ -18,8 +18,6 @@ from delete_account_data import delete_account_data
 
 initialize_app()
 
-firestore_client: google.cloud.firestore.Client = firestore.client()
-
 
 def topic_request_processor(allowed_roles: list) -> Callable:
     def decorator(fn: Callable) -> Callable:
@@ -30,6 +28,7 @@ def topic_request_processor(allowed_roles: list) -> Callable:
             if not user_id or not topic_id:
                 return {"error": "Invalid request"}
 
+            firestore_client: google.cloud.firestore.Client = firestore.client()
             topic_roles = (
                 firestore_client.collection("topics")
                 .document(topic_id)
@@ -40,7 +39,7 @@ def topic_request_processor(allowed_roles: list) -> Callable:
             if topic_roles[user_id] not in allowed_roles:
                 return {"error": "Access denied"}
 
-            return fn(req)
+            fn(req)
 
         return wrapper
 
@@ -48,10 +47,60 @@ def topic_request_processor(allowed_roles: list) -> Callable:
 
 
 @https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-@topic_request_processor(allowed_roles=["owner"])
 def batch_annotate_fn(req: https_fn.CallableRequest) -> Any:
     print(f"batch_annotate_fn: {req.data}")
-    return batch_annotate(req)
+    return topic_request_processor(allowed_roles=["owner"])(batch_annotate(req))
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+# @topic_request_processor(allowed_roles=["owner"])
+def generate_topic_details_fn(req: https_fn.CallableRequest) -> Any:
+    return topic_request_processor(allowed_roles=["owner"])(
+        generate_topic_details(req.data.get("topicId"))
+    )
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+# @topic_request_processor(allowed_roles=["owner"])
+def generate_quiz_fn(req: https_fn.CallableRequest) -> Any:
+    return topic_request_processor(allowed_roles=["owner"])(
+        generate_quiz(req.data["topicId"])
+    )
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+# @topic_request_processor(allowed_roles=["owner"])
+def generate_summary_fn(req: https_fn.CallableRequest) -> Any:
+    return topic_request_processor(allowed_roles=["owner"])(
+        generate_summary(req.data.get("topicId"))
+    )
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+# @topic_request_processor(allowed_roles=["owner"])
+def generate_outline_fn(req: https_fn.CallableRequest) -> Any:
+    return topic_request_processor(allowed_roles=["owner"])(
+        generate_outline(req.data.get("topicId"))
+    )
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+# @topic_request_processor(allowed_roles=["reader", "owner"])
+def check_answer_free_text_fn(req: https_fn.CallableRequest) -> Any:
+    return topic_request_processor(allowed_roles=["reader", "owner"])(
+        check_answer_free_text(
+            req.data.get("topicId"),
+            req.data.get("question"),
+            req.data.get("answer"),
+            req.data.get("providedAnswer"),
+        )
+    )
+
+
+@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
+def delete_account_data_fn(req: https_fn.CallableRequest) -> Any:
+    user_id = req.auth.uid
+    return delete_account_data(user_id)
 
 
 @storage_fn.on_object_finalized(
@@ -104,48 +153,3 @@ def process_annotations_fn(
     [t.start() for t in threads]
     # wait for the threads to finish
     [t.join() for t in threads]
-
-
-@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-@topic_request_processor(allowed_roles=["owner"])
-@topic_request_processor(allowed_roles=["owner"])
-def generate_topic_details_fn(req: https_fn.CallableRequest) -> Any:
-    topic_id = req.data["topicId"]
-    return generate_topic_details(topic_id)
-
-
-@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-@topic_request_processor(allowed_roles=["owner"])
-def generate_quiz_fn(req: https_fn.CallableRequest) -> Any:
-    topic_id = req.data["topicId"]
-    return generate_quiz(topic_id)
-
-
-@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-@topic_request_processor(allowed_roles=["owner"])
-def generate_summary_fn(req: https_fn.CallableRequest) -> Any:
-    topic_id = req.data["topicId"]
-    return generate_summary(topic_id)
-
-
-@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-@topic_request_processor(allowed_roles=["owner"])
-def generate_outline_fn(req: https_fn.CallableRequest) -> Any:
-    topic_id = req.data["topicId"]
-    return generate_outline(topic_id)
-
-
-@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-@topic_request_processor(allowed_roles=["reader", "owner"])
-def check_answer_free_text_fn(req: https_fn.CallableRequest) -> Any:
-    topic_id = req.data["topicId"]
-    question = req.data["question"]
-    answer = req.data["answer"]
-    provided_answer = req.data["providedAnswer"]
-    return check_answer_free_text(topic_id, question, answer, provided_answer)
-
-
-@https_fn.on_call(region="europe-west1", memory=options.MemoryOption.MB_512)
-def delete_account_data_fn(req: https_fn.CallableRequest) -> Any:
-    user_id = req.auth.uid
-    return delete_account_data(user_id)

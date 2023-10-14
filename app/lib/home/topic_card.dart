@@ -385,7 +385,7 @@ class _TopicCardState extends State<TopicCard>
                   child: Column(
                     children: [
                       // List of chips with tags
-                      if (isExpanded && widget.tags != null)
+                      /* if (isExpanded && widget.tags != null)
                         Align(
                           alignment: Alignment.topLeft,
                           child: Wrap(
@@ -398,7 +398,8 @@ class _TopicCardState extends State<TopicCard>
                                     padding: const EdgeInsets.all(0)))
                                 .toList(),
                           ),
-                        ),
+                        ), */
+                      // Quiz
                       if (isExpanded && widget.quizStatus != null)
                         ListTile(
                           dense: true,
@@ -425,6 +426,7 @@ class _TopicCardState extends State<TopicCard>
                             openQuiz(widget.id);
                           },
                         ),
+                      // Summary
                       if (isExpanded && widget.summaryStatus != null)
                         ListTile(
                           dense: true,
@@ -448,7 +450,7 @@ class _TopicCardState extends State<TopicCard>
                           title: Row(
                             children: [
                               Text(AppLocalizations.of(context)!.summary),
-                              const Text(' '),
+                              /* const Text(' '),
                               Badge(
                                 alignment: Alignment.topLeft,
                                 label:
@@ -457,7 +459,7 @@ class _TopicCardState extends State<TopicCard>
                                     Theme.of(context).colorScheme.primary,
                                 textColor:
                                     Theme.of(context).colorScheme.onPrimary,
-                              )
+                              ) */
                             ],
                           ),
                           enabled: widget.summary != null,
@@ -465,6 +467,7 @@ class _TopicCardState extends State<TopicCard>
                             openSummary(widget.id, '${widget.summary}');
                           },
                         ),
+                      // Outline
                       if (isExpanded && widget.outlineStatus != null)
                         ListTile(
                           dense: true,
@@ -488,7 +491,7 @@ class _TopicCardState extends State<TopicCard>
                           title: Row(
                             children: [
                               Text(AppLocalizations.of(context)!.outline),
-                              const Text(' '),
+                              /* const Text(' '),
                               Badge(
                                 // alignment: Alignment.topLeft,
                                 //offset: const Offset(15, -4),
@@ -498,7 +501,7 @@ class _TopicCardState extends State<TopicCard>
                                     Theme.of(context).colorScheme.primary,
                                 textColor:
                                     Theme.of(context).colorScheme.onPrimary,
-                              )
+                              ) */
                             ],
                           ),
                           enabled: widget.outline != null,

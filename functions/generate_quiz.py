@@ -58,9 +58,9 @@ The quiz you generate will have 5 question items and you can have 4 types of que
     1.Multiple choice (multiple_choice): provide at least 3 choices per question and provide the correct answer (exact).
     2.Multiple choice with multiple answers (multiple_choice_multi): provide at least 3 choices per question and provide the correct answers, separated by commas (a potential correct value for answer could be 'foo,bar,test').
     3.Connect relevant terms (connect_terms): at least 3 terms in a random order in 1 column and at least 3 terms in a random order in the other column. The person that takes the test must select a matching term in each column.
-    4.A free text question (free_text). Make sure to ask a question of which the answer can be found in the provided text, and make sure to provide the correct answer in the answer field. 'What do you think of ...?' is not a good question!
+    4.A free text question (free_text). Make sure to ask a question of which the answer can be found in the provided text, and make sure to provide the correct answer in the answer field. 'What do you think of ...?' is not a good question! There should be maximum 1 questino of this type.
 For each question, you also need to provide the correct answer. Make sure that the correct answer is exactly the same as the value of the choice (for connect_terms it should format a string with the indexes of the answers for each column '1-3,2-2,3-1').
-The question should be concise and clear. The question should not list possible choices.
+The question should be concise and clear. The question should not list possible choices. The quiz should be sufficiently difficult and should contain at least 1 of each question type.
 Questions, choices and answers should always be short and concise: answers should never be more than 3 words.
 
 The values of the name, description, questions, choices, answers should all be in the same language as the INPUT.
@@ -68,10 +68,9 @@ Make sure that all output is in the same language as the input text (all field v
 
 {format_instructions}
 
-**INPUT:**
-"{input}"
+INPUT: "{input}"
 
-**JSON OUTPUT:**"""
+JSON OUTPUT:"""
 
         output_parser = PydanticOutputParser(pydantic_object=TopicQuestions)
         format_instructions = output_parser.get_format_instructions()
@@ -87,7 +86,7 @@ Make sure that all output is in the same language as the input text (all field v
         llm = VertexAI(
             model_name="text-bison",
             candidate_count=1,
-            max_output_tokens=1024,
+            max_output_tokens=2048,
             temperature=0.2,
             top_p=0.8,
             top_k=40,
@@ -116,7 +115,10 @@ Make sure that all output is in the same language as the input text (all field v
 
         print("generate_quiz - {topic_id} - done")
 
-        return {"done": True}
+        return {
+            "done": True,
+            "questions": map(lambda question: dict(question), res.questions),
+        }
 
     except Exception as error:
         error_name = type(error).__name__
