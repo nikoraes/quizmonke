@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
@@ -16,7 +17,6 @@ import 'package:quizmonke/auth/decorations.dart';
 import 'package:quizmonke/auth/policy_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home/home_screen.dart';
-import 'package:quizmonke/quiz/quiz_screen.dart';
 
 import 'config.dart';
 
@@ -32,6 +32,16 @@ Future<void> main() async {
 
     // Pass all uncaught errors from the framework to Crashlytics.
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+    if (!kIsWeb) {
+      if (kDebugMode) {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(false);
+      } else {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(true);
+      }
+    }
 
     await FirebaseAppCheck.instance.activate(
       webProvider: ReCaptchaV3Provider(kWebRecaptchaSiteKey),

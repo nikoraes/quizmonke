@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -253,7 +254,8 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
-        child: (currentIndex < questions.length)
+        child: (currentIndex < questions.length &&
+                (currentIndex == 0 || currentIndex % 5 != 0))
             ? _buildQuestion(context, ValueKey(questions[currentIndex]),
                 widget.topicId, questions[currentIndex], (correct) {
                 onAnswerChecked(questions[currentIndex], correct);
@@ -298,8 +300,11 @@ class _QuizScreenState extends State<QuizScreen> {
                     const SizedBox(height: 10),
                     TextButton(
                       onPressed: () {
-                        // if(user.isProUser) _moveToHome()
-                        _loadInterstitialAd(_moveToHome);
+                        if (kIsWeb) {
+                          _moveToHome();
+                        } else {
+                          _loadInterstitialAd(_moveToHome);
+                        }
                       },
                       child: Text(AppLocalizations.of(context)!.back),
                     ),
