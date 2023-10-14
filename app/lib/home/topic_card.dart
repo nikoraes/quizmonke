@@ -182,20 +182,30 @@ class _TopicCardState extends State<TopicCard>
           }).toList(); */
           // Shuffle questions
           questions.shuffle();
-          // Send to quiz (TODO: avoid using named route)
-          Navigator.pushNamed(context, QuizScreen.routeName,
-              arguments: QuizArguments(id, "${widget.name}", questions));
           FirebaseAnalytics.instance.logEvent(name: "open_quiz", parameters: {
             "topic_id": id,
             "questions_firebase_length": querySnapshot.docs.length,
             "questions_length": questions.length,
           });
+          // Send to quiz
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => QuizScreen(
+                  topicId: id,
+                  topicName: '${widget.name}',
+                  questions: questions),
+            ),
+          );
         },
         onError: (e) => print("Error completing: $e"),
       );
     }
 
     void openSummary(String id, String summary) {
+      FirebaseAnalytics.instance.logEvent(name: "open_summary", parameters: {
+        "topic_id": id,
+      });
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -205,12 +215,12 @@ class _TopicCardState extends State<TopicCard>
           ),
         ),
       );
-      FirebaseAnalytics.instance.logEvent(name: "open_summary", parameters: {
-        "topic_id": id,
-      });
     }
 
     void openOutline(String id, String outline) {
+      FirebaseAnalytics.instance.logEvent(name: "open_outline", parameters: {
+        "topic_id": id,
+      });
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -220,9 +230,6 @@ class _TopicCardState extends State<TopicCard>
           ),
         ),
       );
-      FirebaseAnalytics.instance.logEvent(name: "open_outline", parameters: {
-        "topic_id": id,
-      });
     }
 
     void showDeleteDialog(BuildContext parentContext, String topicId) {
