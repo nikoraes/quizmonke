@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -24,7 +25,7 @@ class QuizScreen extends StatefulWidget {
       required this.questions});
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
@@ -66,24 +67,13 @@ class _QuizScreenState extends State<QuizScreen> {
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
-          print('$ad loaded.');
-
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdFailedToShowFullScreenContent: (ad, err) {
-              // Dispose the ad here to free resources.
-              ad.dispose();
-            },
-            onAdDismissedFullScreenContent: (ad) {
-              // Dispose the ad here to free resources.
-              ad.dispose();
-            },
-          );
-
           setState(() {
             _interstitialAd = ad;
           });
         },
-        onAdFailedToLoad: (err) {
+        onAdFailedToLoad: (err) async {
+          await FirebaseCrashlytics.instance
+              .log('Failed to load an interstitial ad: ${err.message}');
           print('Failed to load an interstitial ad: ${err.message}');
         },
       ),
@@ -290,9 +280,35 @@ class _QuizScreenState extends State<QuizScreen> {
                     Text(
                         '${AppLocalizations.of(context)!.skippedLabel} $numberSkipped'),
                     const SizedBox(height: 20),
+                    // Only show this button if there are more than 5 additional questions available
+                    if (questions.length - (currentIndex + 1) > 5)
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (!kIsWeb &&
+                              kDebugMode &&
+                              _interstitialAd != null) {
+                            await _interstitialAd?.show();
+                            if (_interstitialAd != null) {
+                              _interstitialAd!.dispose();
+                            }
+                            _interstitialAd = null;
+                            // Load new ad in background
+                            _loadInterstitialAd();
+                          }
+                          _nextQuestion();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        child:
+                            Text(AppLocalizations.of(context)!.moreQuestions),
+                      ),
                     // TODO: allow to generate more
                     /* ElevatedButton(
-                      onPressed: () {
+                      onPressed: questions.length - () {
                         generateQuiz(topicId);
                       },
                       style: ElevatedButton.styleFrom(
@@ -306,6 +322,10 @@ class _QuizScreenState extends State<QuizScreen> {
                       onPressed: () async {
                         if (!kIsWeb && kDebugMode && _interstitialAd != null) {
                           await _interstitialAd?.show();
+                          if (_interstitialAd != null) {
+                            _interstitialAd!.dispose();
+                          }
+                          _interstitialAd = null;
                         }
                         _moveToHome();
                       },
@@ -321,7 +341,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void dispose() {
     // Dispose the InterstitialAd object
-    _interstitialAd?.dispose();
+    if (_interstitialAd != null) _interstitialAd?.dispose();
 
     super.dispose();
   }

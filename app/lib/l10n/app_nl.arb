@@ -64,5 +64,7 @@
     "questionTooHard": "Vraag te moeilijk",
     "questionTooSimple": "Vraag te eenvoudig",
     "incorrectCorrectAnswer": "Onjuist correct antwoord",
-    "other": "Anders"
+    "other": "Anders",
+    "moreQuestions": "Meer vragen",
+    "generateDetails": "Genereer details"
 }

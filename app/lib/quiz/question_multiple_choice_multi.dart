@@ -14,7 +14,7 @@ class QuestionMultipleChoiceMulti extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _QuestionMultipleChoiceMultiState createState() =>
+  State<QuestionMultipleChoiceMulti> createState() =>
       _QuestionMultipleChoiceMultiState();
 }
 

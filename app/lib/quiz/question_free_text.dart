@@ -17,7 +17,7 @@ class QuestionFreeText extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _QuestionFreeTextState createState() => _QuestionFreeTextState();
+  State<QuestionFreeText> createState() => _QuestionFreeTextState();
 }
 
 class _QuestionFreeTextState extends State<QuestionFreeText> {

@@ -11,7 +11,7 @@ class QuestionMultipleChoice extends StatefulWidget {
       {super.key, required this.questionItem, required this.onAnswerChecked});
 
   @override
-  _QuestionMultipleChoiceState createState() => _QuestionMultipleChoiceState();
+  State<QuestionMultipleChoice> createState() => _QuestionMultipleChoiceState();
 }
 
 class _QuestionMultipleChoiceState extends State<QuestionMultipleChoice> {

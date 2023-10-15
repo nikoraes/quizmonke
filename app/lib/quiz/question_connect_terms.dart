@@ -15,7 +15,7 @@ class QuestionConnectTerms extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _QuestionConnectTermsState createState() => _QuestionConnectTermsState();
+  State<QuestionConnectTerms> createState() => _QuestionConnectTermsState();
 }
 
 class _Pair {

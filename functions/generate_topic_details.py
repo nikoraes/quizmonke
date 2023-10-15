@@ -13,7 +13,7 @@ from langchain.pydantic_v1 import BaseModel, Field
 
 class Topic(BaseModel):
     language: str = Field(
-        description="the language of the provided input, 2-letter code"
+        description="the 2-letter code (ISO 639-1) of the language of the provided input"
     )
     name: str = Field(
         description="the name of the topic (max 20 characters, same language as the input) "
@@ -39,7 +39,9 @@ def generate_topic_details(topic_id: str):
         for document in files:
             fulltext += document.get("text")
 
-        prompt_template = """Detect the language, generate a name, a short description and a list of tags in the correct JSON format for the provided input. Everything should be in the same language as the input.
+        prompt_template = """Detect the language (2-letter code), generate a name, a short description and a list of tags (maximum 5) in the correct JSON format for the provided input. All values (name, description, tags) should be in the same language as the input.
+
+{format_instructions}
 
 INPUT: "{text}"
 
@@ -49,11 +51,11 @@ JSON RESPONSE:"""
         format_instructions = output_parser.get_format_instructions()
         prompt = PromptTemplate(
             template=prompt_template,
-            format_instructions=format_instructions,
+            partial_variables={"format_instructions": format_instructions},
             input_variables=["text"],
         )
         final_prompt = prompt.format(text=fulltext)
-        print(f"generate_topic_details - {topic_id} - final prompt: {final_prompt}")
+        # print(f"generate_topic_details - {topic_id} - final prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -66,16 +68,18 @@ JSON RESPONSE:"""
         )
         res_text = llm(final_prompt)
 
-        print(f"generate_quiz - {topic_id} - res_text: {res_text}")
+        print(f"generate_topic_details - {topic_id} - res_text: {res_text}")
 
         try:
             res = output_parser.parse(res_text)
         except:
-            print(f"generate_quiz - {topic_id} - Trying with OutputFixingParser")
+            print(
+                f"generate_topic_details - {topic_id} - Trying with OutputFixingParser"
+            )
             new_parser = OutputFixingParser.from_llm(parser=output_parser, llm=llm)
             res = new_parser.parse(res_text)
 
-        print(f"generate_quiz - {topic_id} - res: {res}")
+        print(f"generate_topic_details - {topic_id} - res: {res}")
 
         topic_ref.update(
             {
@@ -98,3 +102,4 @@ JSON RESPONSE:"""
         firestore_client.collection("topics").document(topic_id).update(
             {"status": f"error: {error_name}"}
         )
+        return {"done": False, "error": error_name}

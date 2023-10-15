@@ -34,11 +34,11 @@ SUMMARY:"""
             input_variables=["text", "language"],
         )
         final_prompt = prompt.format(text=fulltext, language=language)
-        print(f"generate_summary - {topic_id} - final_prompt: {final_prompt}")
+        # print(f"generate_summary - {topic_id} - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
-            model_name="text-bison@001",
+            model_name="text-bison",
             candidate_count=1,
             max_output_tokens=1024,
             temperature=0.2,
@@ -68,3 +68,4 @@ SUMMARY:"""
         firestore_client.collection("topics").document(topic_id).update(
             {"summaryStatus": f"error: {error_name}"}
         )
+        return {"done": False, "error": error_name}

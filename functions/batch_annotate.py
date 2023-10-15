@@ -46,6 +46,6 @@ def batch_annotate(req: https_fn.CallableRequest) -> Any:
             f"batch_annotate - Error while submitting annotation request: {error_name} {error} {error.__traceback__}"
         )
         firestore_client.collection("topics").document(topic_id).update(
-            {"status": f"error: {error_name}"}
+            {"status": f"error: {error_name}", "extractStatus": f"error: {error_name}"}
         )
         return {"done": False, "status": f"error: {error_name}"}

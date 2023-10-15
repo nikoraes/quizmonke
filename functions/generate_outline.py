@@ -40,7 +40,7 @@ OUTLINE:"""
             input_variables=["text", "language"],
         )
         final_prompt = prompt.format(text=fulltext, language=language)
-        print(f"generate_outline - {topic_id} - final_prompt: {final_prompt}")
+        # print(f"generate_outline - {topic_id} - final_prompt: {final_prompt}")
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
@@ -74,3 +74,4 @@ OUTLINE:"""
         firestore_client.collection("topics").document(topic_id).update(
             {"outlineStatus": f"error: {error_name}"}
         )
+        return {"done": False, "error": error_name}

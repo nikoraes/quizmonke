@@ -9,8 +9,7 @@ class ImagePreviewView extends StatefulWidget {
   const ImagePreviewView(this.file, this.imageTitle, {super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ImagePreviewViewState createState() => _ImagePreviewViewState();
+  State<ImagePreviewView> createState() => _ImagePreviewViewState();
 }
 
 class _ImagePreviewViewState extends State<ImagePreviewView> {

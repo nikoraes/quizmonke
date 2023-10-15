@@ -56,7 +56,7 @@ def batch_annotate_fn(req: https_fn.CallableRequest) -> Any:
 # @topic_request_processor(allowed_roles=["owner"])
 def generate_topic_details_fn(req: https_fn.CallableRequest) -> Any:
     return topic_request_processor(allowed_roles=["owner"])(
-        generate_topic_details(req.data.get("topicId"))
+        generate_topic_details(req.data["topicId"])
     )
 
 
@@ -72,7 +72,7 @@ def generate_quiz_fn(req: https_fn.CallableRequest) -> Any:
 # @topic_request_processor(allowed_roles=["owner"])
 def generate_summary_fn(req: https_fn.CallableRequest) -> Any:
     return topic_request_processor(allowed_roles=["owner"])(
-        generate_summary(req.data.get("topicId"))
+        generate_summary(req.data["topicId"])
     )
 
 
@@ -80,7 +80,7 @@ def generate_summary_fn(req: https_fn.CallableRequest) -> Any:
 # @topic_request_processor(allowed_roles=["owner"])
 def generate_outline_fn(req: https_fn.CallableRequest) -> Any:
     return topic_request_processor(allowed_roles=["owner"])(
-        generate_outline(req.data.get("topicId"))
+        generate_outline(req.data["topicId"])
     )
 
 
@@ -109,43 +109,57 @@ def delete_account_data_fn(req: https_fn.CallableRequest) -> Any:
 def process_annotations_fn(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
-    topic_id = process_annotations(event)
-    if topic_id == None:
+    annotations_res = process_annotations(event)
+    if annotations_res["done"]:
+        topic_id = str(annotations_res["topicId"])
+        print(f"process_annotations_fn - Annotations processed: {topic_id}")
+    elif annotations_res["skip"]:
+        # skip
         return
-    print(f"process_annotations_fn - Annotations processed: {topic_id}")
+    else:
+        print(
+            f"process_annotations_fn - Failed processing annotations: {annotations_res['error']}"
+        )
+        return
 
     # This also extracts the language, which is needed for the others
-    def topic_details_thread():
-        topic_details_res = generate_topic_details(topic_id)
-        if topic_details_res["done"]:
-            print(f"process_annotations_fn - Topic details generated: {topic_id}")
-        else:
-            print(f"process_annotations_fn - Topic details failed: {topic_id}")
+    topic_details_res = generate_topic_details(topic_id)
+    if topic_details_res["done"]:
+        print(f"process_annotations_fn - Topic details generated: {topic_id}")
+    else:
+        print(
+            f"process_annotations_fn - Topic details failed: {topic_id} - Error: {topic_details_res['error']}"
+        )
 
     def questions_thread():
         quiz_res = generate_quiz(topic_id)
         if quiz_res["done"]:
             print(f"process_annotations_fn - Quiz generated: {topic_id}")
         else:
-            print(f"process_annotations_fn - Quiz generation failed: {topic_id}")
+            print(
+                f"process_annotations_fn - Quiz generation failed: {topic_id} - Error: {quiz_res['error']}"
+            )
 
     def summary_thread():
         summ_res = generate_summary(topic_id)
         if summ_res["done"]:
             print(f"process_annotations_fn - Summary generated: {topic_id}")
         else:
-            print(f"process_annotations_fn - Summary generation failed: {topic_id}")
+            print(
+                f"process_annotations_fn - Summary generation failed: {topic_id} - Error: {summ_res['error']}"
+            )
 
     def outline_thread():
         outline_res = generate_outline(topic_id)
         if outline_res["done"]:
             print(f"process_annotations_fn - Outline generated: {topic_id}")
         else:
-            print(f"process_annotations_fn - Outline generation failed: {topic_id}")
+            print(
+                f"process_annotations_fn - Outline generation failed: {topic_id} - Error: {outline_res['error']}"
+            )
 
     threads: List[Thread] = []
     # create the threads
-    threads.append(Thread(target=topic_details_thread))
     threads.append(Thread(target=questions_thread))
     threads.append(Thread(target=summary_thread))
     threads.append(Thread(target=outline_thread))

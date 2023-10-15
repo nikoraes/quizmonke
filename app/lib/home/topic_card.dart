@@ -5,74 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizmonke/quiz/question_item.dart';
 import 'package:quizmonke/quiz/quiz_screen.dart';
+import 'package:quizmonke/services/delete_topic.dart';
+import 'package:quizmonke/services/generate_outline.dart';
+import 'package:quizmonke/services/generate_quiz.dart';
+import 'package:quizmonke/services/generate_summary.dart';
+import 'package:quizmonke/services/generate_topic_details.dart';
 import 'package:quizmonke/utils/markdown_screen.dart';
-
-Future<void> deleteTopic(String topicId) async {
-  final batch = FirebaseFirestore.instance.batch();
-  // questions
-  var questions = await FirebaseFirestore.instance
-      .collection("topics/$topicId/questions")
-      .get();
-  for (var doc in questions.docs) {
-    batch.delete(doc.reference);
-  }
-  // files
-  var files = await FirebaseFirestore.instance
-      .collection("topics/$topicId/files")
-      .get();
-  for (var doc in files.docs) {
-    batch.delete(doc.reference);
-  }
-  // topic
-  var topicRef = FirebaseFirestore.instance.collection("topics").doc(topicId);
-  batch.delete(topicRef);
-  await batch.commit();
-  FirebaseAnalytics.instance.logEvent(name: "delete_topic", parameters: {
-    "topic_id": topicId,
-  });
-}
-
-Future<void> generateQuiz(String topicId) async {
-  // TODO: Set to generating immediately, because function cold start now makes this take a while
-  // then try catch and do something
-  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
-      .httpsCallable('generate_quiz_fn')
-      .call({"topicId": topicId});
-  final response = result.data as Map<String, dynamic>;
-  print("Response: $response");
-  FirebaseAnalytics.instance.logEvent(name: "generate_quiz", parameters: {
-    "topic_id": topicId,
-    "response": response,
-  });
-}
-
-Future<void> generateSummary(String topicId) async {
-  // TODO: Set to generating immediately, because function cold start now makes this take a while
-  // then try catch and do something
-  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
-      .httpsCallable('generate_summary_fn')
-      .call({"topicId": topicId});
-  final response = result.data as Map<String, dynamic>;
-  print("Response: $response");
-  FirebaseAnalytics.instance.logEvent(name: "generate_summary", parameters: {
-    "topic_id": topicId,
-    "response": response,
-  });
-}
-
-Future<void> generateOutline(String topicId) async {
-  // TODO: Set to generating immediately, because function cold start now makes this take a while
-  // then try catch and do something
-  final result = await FirebaseFunctions.instanceFor(region: 'europe-west1')
-      .httpsCallable('generate_outline_fn')
-      .call({"topicId": topicId});
-  final response = result.data as Map<String, dynamic>;
-  print("Response: $response");
-  FirebaseAnalytics.instance.logEvent(name: "generate_outline", parameters: {
-    "topic_id": topicId,
-    "response": response,
-  });
-}
 
 // TODO: create Firestore converters
 class TopicCard extends StatefulWidget {
@@ -128,7 +66,7 @@ class TopicCard extends StatefulWidget {
   }
 
   @override
-  _TopicCardState createState() => _TopicCardState();
+  State<TopicCard> createState() => _TopicCardState();
 }
 
 class _TopicCardState extends State<TopicCard>
@@ -270,6 +208,13 @@ class _TopicCardState extends State<TopicCard>
           );
         },
         menuChildren: [
+          if (widget.extractStatus == 'done')
+            MenuItemButton(
+              child: Text(AppLocalizations.of(context)!.generateDetails),
+              onPressed: () {
+                generateTopicDetails(widget.id);
+              },
+            ),
           if (widget.extractStatus == 'done')
             MenuItemButton(
               child: Text(AppLocalizations.of(context)!.generateQuiz),

@@ -255,20 +255,20 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
       appBar: AppBar(
         actions: [
           imageFiles.isNotEmpty
-              ? TextButton(
-                  style: Theme.of(context).textButtonTheme.style?.copyWith(
-                      foregroundColor: MaterialStateProperty.all<Color>(
-                          Theme.of(context).colorScheme.onInverseSurface)),
-                  onPressed: () {
-                    for (int i = 0; i < imageFiles.length; i++) {
-                      File file = File(imageFiles[i].path);
-                      imageList.add(
-                        MediaModel.blob(file, "", file.readAsBytesSync()),
-                      );
-                    }
-                    Navigator.pop(context, imageList);
-                  },
-                  child: Text(AppLocalizations.of(context)!.done),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      for (int i = 0; i < imageFiles.length; i++) {
+                        File file = File(imageFiles[i].path);
+                        imageList.add(
+                          MediaModel.blob(file, "", file.readAsBytesSync()),
+                        );
+                      }
+                      Navigator.pop(context, imageList);
+                    },
+                    child: Text(AppLocalizations.of(context)!.done),
+                  ),
                 )
               : const SizedBox()
         ],

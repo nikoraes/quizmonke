@@ -14,7 +14,7 @@ vertexai.init(project="schoolscan-4c8d8", location="us-central1")
 def check_answer_free_text(
     topic_id: str, question: str, answer: str, provided_answer: str
 ):
-    firestore_client: google.cloud.firestore.Client = firestore.client()
+    # firestore_client: google.cloud.firestore.Client = firestore.client()
 
     llm = VertexAI(
         model_name="text-bison@001",
@@ -26,19 +26,19 @@ def check_answer_free_text(
     )
 
     template = """You will receive a question, the correct answer and an answer provided by the user. You need to check whether the provided answer is correct. 
-    In case the correct answer doesn't provide enough information to verify the provided answer, you need to respond that you need more context. 
-    You can only respond with the following text (nothing else):
-    true: The answer is correct
-    false: The answer is wrong
-    need_context:  You need more context
+        In case the correct answer doesn't provide enough information to verify the provided answer, you need to respond that you need more context. 
+        You can only respond with the following text (nothing else):
+        true: The answer is correct
+        false: The answer is wrong
+        need_context:  You need more context
 
-    QUESTION: {question}
+        QUESTION: {question}
 
-    CORRECT ANSWER: {answer}
+        CORRECT ANSWER: {answer}
 
-    PROVIDED ANSWER: {provided_answer}
+        PROVIDED ANSWER: {provided_answer}
 
-    RESPONSE:"""
+        RESPONSE:"""
 
     prompt = PromptTemplate(
         input_variables=["question", "answer", "provided_answer"],

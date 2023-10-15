@@ -67,6 +67,7 @@ Future<void> main() async {
       } else {
         print('User ${user.uid} ${user.displayName} is signed in!');
         await FirebaseAnalytics.instance.setUserId(id: user.uid);
+        await FirebaseCrashlytics.instance.setUserIdentifier(user.uid);
       }
     });
 
@@ -294,6 +295,10 @@ WidgetBuilder buildForgotPasswordScreen(BuildContext context) {
 WidgetBuilder buildProfileScreen(BuildContext context) {
   return (context) {
     return ProfileScreen(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        title: const Text('Profile'),
+      ),
       actions: [
         SignedOutAction((context) {
           Navigator.pushReplacementNamed(context, '/sign-in');

@@ -113,7 +113,7 @@ JSON OUTPUT:"""
             }
         )
 
-        print("generate_quiz - {topic_id} - done")
+        print(f"generate_quiz - {topic_id} - done")
 
         return {
             "done": True,
@@ -128,3 +128,4 @@ JSON OUTPUT:"""
         firestore_client.collection("topics").document(topic_id).update(
             {"quizStatus": f"error: {error_name}"}
         )
+        return {"done": False, "error": error_name}

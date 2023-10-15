@@ -64,5 +64,7 @@
     "questionTooHard": "Pregunta demasiado difícil",
     "questionTooSimple": "Pregunta demasiado simple",
     "incorrectCorrectAnswer": "Respuesta correcta incorrecta",
-    "other": "Otro"
+    "other": "Otro",
+    "moreQuestions": "Más preguntas",
+    "generateDetails": "Generar detalles"
 }
