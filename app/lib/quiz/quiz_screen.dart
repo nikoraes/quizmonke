@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -185,6 +186,21 @@ class _QuizScreenState extends State<QuizScreen> {
                 onPressed: isDeleteButtonEnabled
                     ? () {
                         if (isDeleteButtonEnabled) {
+                          FirebaseAnalytics.instance.logEvent(
+                              name: "quiz_answer_deleted",
+                              parameters: {
+                                "topic_id": widget.topicId,
+                                "question_id": questionItem.id,
+                                "reason": selectedIssue,
+                                "result": QuestionResult.correct.name,
+                              });
+                          FirebaseFirestore.instance
+                              .collection("topics/${widget.topicId}/questions")
+                              .doc(questionItem.id)
+                              .update({
+                            'isDeleted': true,
+                            'deletedReason': selectedIssue
+                          });
                           // TODO:  Add logic to delete the question and move to the next question
                           print('Delete question with issue: $selectedIssue');
                           _nextQuestion();
@@ -198,6 +214,13 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
+                  FirebaseAnalytics.instance
+                      .logEvent(name: "quiz_answer_skipped", parameters: {
+                    "topic_id": widget.topicId,
+                    "question_id": questionItem.id,
+                    "reason": selectedIssue,
+                    "result": QuestionResult.correct.name,
+                  });
                   // Move to the next question if there are more questions
                   _nextQuestion();
                   Navigator.pop(parentContext);

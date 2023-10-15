@@ -25,10 +25,10 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/topics/$(topicId)).data.roles[request.auth.uid] == 'owner';
         }
         allow read: if request.auth != null && allowTopicRead();
-        allow delete: if request.auth != null && allowTopicWrite();
+        allow update, delete: if request.auth != null && allowTopicWrite();
       }
       
-      match /files/{questionId} {  
+      match /files/{fileId} {  
         function allowTopicRead () {
           return get(/databases/$(database)/documents/topics/$(topicId)).data.roles[request.auth.uid] in ['reader', 'owner'];
         }

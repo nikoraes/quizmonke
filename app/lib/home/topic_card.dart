@@ -107,6 +107,7 @@ class _TopicCardState extends State<TopicCard>
           List<QuestionItem> questions = <QuestionItem>[];
           for (var doc in querySnapshot.docs) {
             try {
+              if (doc.data()['isDeleted'] == true) continue;
               var q = QuestionItem.fromFirestore(doc, null);
               questions.add(q);
             } catch (e) {
