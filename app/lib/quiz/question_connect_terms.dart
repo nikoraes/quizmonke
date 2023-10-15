@@ -44,8 +44,8 @@ class _QuestionConnectTermsState extends State<QuestionConnectTerms> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildColumn(widget.questionItem.leftColumn, "left"),
-            _buildColumn(widget.questionItem.rightColumn, "right"),
+            _buildColumn(widget.questionItem.leftColumn ?? [], "left"),
+            _buildColumn(widget.questionItem.rightColumn ?? [], "right"),
           ],
         ),
         const SizedBox(height: 20),
@@ -73,15 +73,12 @@ class _QuestionConnectTermsState extends State<QuestionConnectTerms> {
     );
   }
 
-  Widget _buildColumn(List<String>? terms, String columnType) {
+  Widget _buildColumn(List<String> terms, String columnType) {
     final double boxWidth = MediaQuery.of(context).size.width *
         0.4; // Adjust the percentage as needed
 
-    final List<String> shuffledTerms = [...terms ?? []];
-    shuffledTerms.shuffle();
-
     return Column(
-      children: shuffledTerms.map((term) {
+      children: terms.map((term) {
         return GestureDetector(
           onTap: () {
             setState(() {

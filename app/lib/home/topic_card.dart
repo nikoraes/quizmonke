@@ -509,7 +509,7 @@ class _TopicCardState extends State<TopicCard>
                           enabled: widget.outline != null,
                           onTap: () {
                             if (widget.outline == null) return;
-                            openSummary(widget.id, '${widget.outline}');
+                            openOutline(widget.id, '${widget.outline}');
                           },
                         ),
                     ],

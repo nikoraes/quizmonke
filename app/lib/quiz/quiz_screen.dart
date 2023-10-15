@@ -43,21 +43,39 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() {
       questions = widget.questions;
     });
+    _loadInterstitialAd();
   }
 
   void _moveToHome() {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  void _loadInterstitialAd(Function onAdDismissed) {
+  void _nextQuestion() {
+    setState(() {
+      currentIndex++; // Move to the next question
+    });
+
+    /* if ((currentIndex == 0 || currentIndex % 5 != 0) && (_interstitialAd != null)) {
+      _interstitialAd?.show();
+    }  */
+  }
+
+  void _loadInterstitialAd() {
     InterstitialAd.load(
       adUnitId: AdHelper.interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          print('$ad loaded.');
+
           ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdFailedToShowFullScreenContent: (ad, err) {
+              // Dispose the ad here to free resources.
+              ad.dispose();
+            },
             onAdDismissedFullScreenContent: (ad) {
-              onAdDismissed();
+              // Dispose the ad here to free resources.
+              ad.dispose();
             },
           );
 
@@ -66,7 +84,7 @@ class _QuizScreenState extends State<QuizScreen> {
           });
         },
         onAdFailedToLoad: (err) {
-          debugPrint('Failed to load an interstitial ad: ${err.message}');
+          print('Failed to load an interstitial ad: ${err.message}');
         },
       ),
     );
@@ -84,9 +102,7 @@ class _QuizScreenState extends State<QuizScreen> {
               onPressed: () {
                 print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
-                setState(() {
-                  currentIndex++; // Move to the next question
-                });
+                _nextQuestion();
                 Navigator.pop(parentContext);
               },
               child: Text(AppLocalizations.of(context)!.nextQuestion),
@@ -118,9 +134,7 @@ class _QuizScreenState extends State<QuizScreen> {
               onPressed: () {
                 print('currentIndex: $currentIndex / ${questions.length}');
                 // Move to the next question if there are more questions
-                setState(() {
-                  currentIndex++; // Move to the next question
-                });
+                _nextQuestion();
                 // Add the question to the end again
                 questions.add(questionItem);
                 // close dialog
@@ -140,11 +154,6 @@ class _QuizScreenState extends State<QuizScreen> {
     // Variables to track selected issue and whether the 'Delete' button is enabled
     String selectedIssue = '';
     bool isDeleteButtonEnabled = false;
-    nextQuestion() {
-      setState(() {
-        currentIndex++; // Move to the next question
-      });
-    }
 
     // Show dialog
     showDialog(
@@ -182,30 +191,25 @@ class _QuizScreenState extends State<QuizScreen> {
               ],
             ),
             actions: [
-              ElevatedButton(
+              TextButton(
                 onPressed: isDeleteButtonEnabled
                     ? () {
                         if (isDeleteButtonEnabled) {
                           // TODO:  Add logic to delete the question and move to the next question
                           print('Delete question with issue: $selectedIssue');
-                          nextQuestion();
+                          _nextQuestion();
                           Navigator.pop(parentContext);
                         }
                       }
                     : null,
                 child: Text(
                   AppLocalizations.of(context)!.delete,
-                  style: TextStyle(
-                    color: isDeleteButtonEnabled
-                        ? Theme.of(context).colorScheme.onError
-                        : Colors.grey,
-                  ),
                 ),
               ),
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
                   // Move to the next question if there are more questions
-                  nextQuestion();
+                  _nextQuestion();
                   Navigator.pop(parentContext);
                 },
                 child: Text(AppLocalizations.of(context)!.nextQuestion),
@@ -299,12 +303,11 @@ class _QuizScreenState extends State<QuizScreen> {
                     ), */
                     const SizedBox(height: 10),
                     TextButton(
-                      onPressed: () {
-                        if (kIsWeb) {
-                          _moveToHome();
-                        } else {
-                          _loadInterstitialAd(_moveToHome);
+                      onPressed: () async {
+                        if (!kIsWeb && kDebugMode && _interstitialAd != null) {
+                          await _interstitialAd?.show();
                         }
+                        _moveToHome();
                       },
                       child: Text(AppLocalizations.of(context)!.back),
                     ),

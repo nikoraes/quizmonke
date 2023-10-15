@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>232118707051-2drv8ehlpcadhv1dsthcjvfav2mv0k6v.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.232118707051-2drv8ehlpcadhv1dsthcjvfav2mv0k6v</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>232118707051-796atbm9s2oq60b7pskb7dmqtjno8kf8.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBjITqNBVZWRZQfI3GkQ8flWFakWIgHYO8</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.quizmonke</string>
+	<string>com.raes.quizmonke</string>
 	<key>PROJECT_ID</key>
 	<string>schoolscan-4c8d8</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:232118707051:ios:32abdae9a45ea5c37aa22e</string>
+	<string>1:232118707051:ios:9ec54cf336f489317aa22e</string>
 </dict>
 </plist>

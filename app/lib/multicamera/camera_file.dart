@@ -200,10 +200,13 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
                       child: FloatingActionButton(
                         shape: const CircleBorder(),
                         backgroundColor: Colors.white,
-                        onPressed: () {
-                          _currIndex = _currIndex == 0 ? 1 : 0;
-                          takePicture();
-                        },
+                        // Limit to max 5 images
+                        onPressed: imageFiles.length <= 5
+                            ? () {
+                                _currIndex = _currIndex == 0 ? 1 : 0;
+                                takePicture();
+                              }
+                            : null,
                         child: const Icon(Icons.camera_alt_outlined),
                       ),
                     ),
@@ -252,8 +255,11 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
       appBar: AppBar(
         actions: [
           imageFiles.isNotEmpty
-              ? GestureDetector(
-                  onTap: () {
+              ? TextButton(
+                  style: Theme.of(context).textButtonTheme.style?.copyWith(
+                      foregroundColor: MaterialStateProperty.all<Color>(
+                          Theme.of(context).colorScheme.onInverseSurface)),
+                  onPressed: () {
                     for (int i = 0; i < imageFiles.length; i++) {
                       File file = File(imageFiles[i].path);
                       imageList.add(
@@ -262,14 +268,14 @@ class _CameraFileState extends State<CameraFile> with TickerProviderStateMixin {
                     }
                     Navigator.pop(context, imageList);
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: _doneButton(),
-                  ))
+                  child: Text(AppLocalizations.of(context)!.done),
+                )
               : const SizedBox()
         ],
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
+        backgroundColor:
+            Theme.of(context).colorScheme.background.withOpacity(0.0),
       ),
       backgroundColor: Theme.of(context).colorScheme.background,
       extendBody: true,

@@ -7,7 +7,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:quizmonke/home/topics_list.dart';
 import 'package:quizmonke/multicamera/camera_file.dart';
 import 'package:quizmonke/multicamera/multiple_image_camera.dart';

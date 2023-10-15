@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "232118707051-83st21cbfvafgdkmledeos956btfiefg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.raes.quizmonke",
+            "certificate_hash": "e86c1a3d39b352ba809b8830795e67e50e29ff96"
+          }
+        },
+        {
           "client_id": "232118707051-544gf26bmqcm2oab2nam894vgrkds528.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -28,10 +28,16 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    MobileAds.instance.initialize();
-
     // Pass all uncaught errors from the framework to Crashlytics.
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    MobileAds.instance.initialize();
+
+    FirebaseAnalytics.instance.logAppOpen();
 
     if (!kIsWeb) {
       if (kDebugMode) {
@@ -55,11 +61,12 @@ Future<void> main() async {
       appleProvider: AppleProvider.appAttest,
     );
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
       if (user == null) {
         print('User is currently signed out!');
       } else {
         print('User ${user.uid} ${user.displayName} is signed in!');
+        await FirebaseAnalytics.instance.setUserId(id: user.uid);
       }
     });
 
@@ -73,6 +80,7 @@ Future<void> main() async {
 class App extends StatelessWidget {
   const App({super.key});
 
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 

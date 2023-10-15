@@ -26,18 +26,30 @@ class QuestionItem {
     SnapshotOptions? options,
   ) {
     final data = snapshot.data();
+
+    List<String>? leftColumn = data?['left_column'] is Iterable
+        ? List.from(data?['left_column'])
+        : null;
+    List<String>? rightColumn = data?['right_column'] is Iterable
+        ? List.from(data?['right_column'])
+        : null;
+
+    // Shuffle leftColumn and rightColumn if they are not null
+    if (leftColumn != null) {
+      leftColumn.shuffle();
+    }
+    if (rightColumn != null) {
+      rightColumn.shuffle();
+    }
+
     return QuestionItem(
         id: snapshot.id,
         type: data?['type'],
         question: data?['question'],
         choices:
             data?['choices'] is Iterable ? List.from(data?['choices']) : null,
-        leftColumn: data?['left_column'] is Iterable
-            ? List.from(data?['left_column'])
-            : null,
-        rightColumn: data?['right_column'] is Iterable
-            ? List.from(data?['right_column'])
-            : null,
+        leftColumn: leftColumn,
+        rightColumn: rightColumn,
         answer: data?['type'] == "connect_terms" &&
                 data?['answer'] != null &&
                 data?['left_column'] is Iterable &&
