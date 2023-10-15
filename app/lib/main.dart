@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
@@ -11,29 +12,45 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:quizmonke/auth/decorations.dart';
 import 'package:quizmonke/auth/policy_screen.dart';
 import 'package:quizmonke/firebase_options.dart';
 import 'package:quizmonke/home/home_screen.dart';
-import 'package:quizmonke/quiz/quiz_screen.dart';
 
 import 'config.dart';
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
+
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
     // Pass all uncaught errors from the framework to Crashlytics.
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    MobileAds.instance.initialize();
+
+    FirebaseAnalytics.instance.logAppOpen();
+
+    if (!kIsWeb) {
+      if (kDebugMode) {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(false);
+      } else {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(true);
+      }
+    }
+
     await FirebaseAppCheck.instance.activate(
       webProvider: ReCaptchaV3Provider(kWebRecaptchaSiteKey),
-      // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
-      // your preferred provider. Choose from:
-      // 1. Debug provider
-      // 2. Safety Net provider
-      // 3. Play Integrity provider
       androidProvider: AndroidProvider.playIntegrity,
       // Default provider for iOS/macOS is the Device Check provider. You can use the "AppleProvider" enum to choose
       // your preferred provider. Choose from:
@@ -43,15 +60,19 @@ Future<void> main() async {
       // 4. App Attest provider with fallback to Device Check provider (App Attest provider is only available on iOS 14.0+, macOS 14.0+)
       appleProvider: AppleProvider.appAttest,
     );
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
       if (user == null) {
         print('User is currently signed out!');
       } else {
         print('User ${user.uid} ${user.displayName} is signed in!');
+        await FirebaseAnalytics.instance.setUserId(id: user.uid);
       }
     });
+
     FirebaseUIAuth.configureProviders(
         [EmailAuthProvider(), GoogleProvider(clientId: GOOGLE_CLIENT_ID)]);
+
     runApp(const App());
   }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
 }
@@ -59,6 +80,7 @@ Future<void> main() async {
 class App extends StatelessWidget {
   const App({super.key});
 
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 

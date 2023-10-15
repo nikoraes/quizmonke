@@ -175,11 +175,6 @@ class _TopicCardState extends State<TopicCard>
               print("Error processing: $e");
             }
           }
-          // Parse to QuestionItem
-          /* List<QuestionItem> questions =
-              querySnapshot.docs.map((querySnapshot) {
-            return QuestionItem.fromFirestore(querySnapshot, null);
-          }).toList(); */
           // Shuffle questions
           questions.shuffle();
           FirebaseAnalytics.instance.logEvent(name: "open_quiz", parameters: {
@@ -514,7 +509,7 @@ class _TopicCardState extends State<TopicCard>
                           enabled: widget.outline != null,
                           onTap: () {
                             if (widget.outline == null) return;
-                            openSummary(widget.id, '${widget.outline}');
+                            openOutline(widget.id, '${widget.outline}');
                           },
                         ),
                     ],

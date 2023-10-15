@@ -44,8 +44,8 @@ class _QuestionConnectTermsState extends State<QuestionConnectTerms> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildColumn(widget.questionItem.leftColumn, "left"),
-            _buildColumn(widget.questionItem.rightColumn, "right"),
+            _buildColumn(widget.questionItem.leftColumn ?? [], "left"),
+            _buildColumn(widget.questionItem.rightColumn ?? [], "right"),
           ],
         ),
         const SizedBox(height: 20),
@@ -73,79 +73,77 @@ class _QuestionConnectTermsState extends State<QuestionConnectTerms> {
     );
   }
 
-  Widget _buildColumn(List<String>? terms, String columnType) {
+  Widget _buildColumn(List<String> terms, String columnType) {
     final double boxWidth = MediaQuery.of(context).size.width *
         0.4; // Adjust the percentage as needed
 
     return Column(
-      children: terms?.map((term) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  final pairToRemove = selectedPairs.firstWhere(
-                    (pair) =>
-                        (pair.left == term && columnType == 'left') ||
-                        (pair.right == term && columnType == 'right'),
-                    orElse: () =>
-                        _Pair(left: '', right: '', color: Colors.grey),
-                  );
+      children: terms.map((term) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              final pairToRemove = selectedPairs.firstWhere(
+                (pair) =>
+                    (pair.left == term && columnType == 'left') ||
+                    (pair.right == term && columnType == 'right'),
+                orElse: () => _Pair(left: '', right: '', color: Colors.grey),
+              );
 
-                  if (pairToRemove.left.isNotEmpty ||
-                      pairToRemove.right.isNotEmpty) {
-                    selectedPairs.remove(pairToRemove);
-                  }
+              if (pairToRemove.left.isNotEmpty ||
+                  pairToRemove.right.isNotEmpty) {
+                selectedPairs.remove(pairToRemove);
+              }
 
-                  if (currentlySelectedPair == null ||
-                      (currentlySelectedPair!.right.isNotEmpty &&
-                          columnType == 'right') ||
-                      (currentlySelectedPair!.left.isNotEmpty &&
-                          columnType == 'left')) {
-                    currentlySelectedPair = _Pair(
-                        left: columnType == 'left' ? term : '',
-                        right: columnType == 'right' ? term : '',
-                        color: _generateRandomColor());
-                  } else if (currentlySelectedPair!.right.isEmpty &&
-                      currentlySelectedPair!.left.isNotEmpty &&
-                      columnType == 'right') {
-                    currentlySelectedPair!.right = term;
-                    selectedPairs.add(currentlySelectedPair!);
-                    currentlySelectedPair = null;
-                  } else if (currentlySelectedPair!.left.isEmpty &&
-                      currentlySelectedPair!.right.isNotEmpty &&
-                      columnType == 'left') {
-                    currentlySelectedPair!.left = term;
-                    selectedPairs.add(currentlySelectedPair!);
-                    currentlySelectedPair = null;
-                  } else if (currentlySelectedPair!.right == term) {
-                    currentlySelectedPair!.right = '';
-                  } else if (currentlySelectedPair!.left == term) {
-                    currentlySelectedPair!.left = '';
-                  }
-                });
-              },
+              if (currentlySelectedPair == null ||
+                  (currentlySelectedPair!.right.isNotEmpty &&
+                      columnType == 'right') ||
+                  (currentlySelectedPair!.left.isNotEmpty &&
+                      columnType == 'left')) {
+                currentlySelectedPair = _Pair(
+                    left: columnType == 'left' ? term : '',
+                    right: columnType == 'right' ? term : '',
+                    color: _generateRandomColor());
+              } else if (currentlySelectedPair!.right.isEmpty &&
+                  currentlySelectedPair!.left.isNotEmpty &&
+                  columnType == 'right') {
+                currentlySelectedPair!.right = term;
+                selectedPairs.add(currentlySelectedPair!);
+                currentlySelectedPair = null;
+              } else if (currentlySelectedPair!.left.isEmpty &&
+                  currentlySelectedPair!.right.isNotEmpty &&
+                  columnType == 'left') {
+                currentlySelectedPair!.left = term;
+                selectedPairs.add(currentlySelectedPair!);
+                currentlySelectedPair = null;
+              } else if (currentlySelectedPair!.right == term) {
+                currentlySelectedPair!.right = '';
+              } else if (currentlySelectedPair!.left == term) {
+                currentlySelectedPair!.left = '';
+              }
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: _getPairColor(term, columnType),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: _getPairColor(term, columnType),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Container(
-                    width: boxWidth,
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      term,
-                      style: const TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                width: boxWidth,
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  term,
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            );
-          }).toList() ??
-          [],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 

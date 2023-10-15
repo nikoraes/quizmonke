@@ -7,7 +7,7 @@ import vertexai
 from langchain.prompts import PromptTemplate
 from langchain.llms import VertexAI
 
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import PydanticOutputParser, OutputFixingParser
 from langchain.pydantic_v1 import BaseModel, Field
 
 
@@ -39,12 +39,11 @@ def generate_topic_details(topic_id: str):
         for document in files:
             fulltext += document.get("text")
 
-        prompt_template = """Detect the language, generate a name, a short description and a list of tags for the provided input. Everything should be in the same language as the input.
+        prompt_template = """Detect the language, generate a name, a short description and a list of tags in the correct JSON format for the provided input. Everything should be in the same language as the input.
 
-**INPUT:**
-"{text}"
+INPUT: "{text}"
 
-**JSON RESPONSE:**"""
+JSON RESPONSE:"""
 
         output_parser = PydanticOutputParser(pydantic_object=Topic)
         format_instructions = output_parser.get_format_instructions()
@@ -58,7 +57,7 @@ def generate_topic_details(topic_id: str):
 
         vertexai.init(project="schoolscan-4c8d8", location="us-central1")
         llm = VertexAI(
-            model_name="text-bison@001",
+            model_name="text-bison",
             candidate_count=1,
             max_output_tokens=1024,
             temperature=0.2,
@@ -69,7 +68,12 @@ def generate_topic_details(topic_id: str):
 
         print(f"generate_quiz - {topic_id} - res_text: {res_text}")
 
-        res = output_parser.parse(res_text)
+        try:
+            res = output_parser.parse(res_text)
+        except:
+            print(f"generate_quiz - {topic_id} - Trying with OutputFixingParser")
+            new_parser = OutputFixingParser.from_llm(parser=output_parser, llm=llm)
+            res = new_parser.parse(res_text)
 
         print(f"generate_quiz - {topic_id} - res: {res}")
 
