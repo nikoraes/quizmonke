@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "232118707051",
+    "project_id": "schoolscan-4c8d8",
+    "storage_bucket": "schoolscan-4c8d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232118707051:android:81e87b1e525bd48e7aa22e",
+        "android_client_info": {
+          "package_name": "com.raes.quizmonke"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "232118707051-796atbm9s2oq60b7pskb7dmqtjno8kf8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.raes.quizmonke",
+            "certificate_hash": "d3f00a4e9e0f08a5b5ea5bf7ff1f69f9251a0ea0"
+          }
+        },
+        {
+          "client_id": "232118707051-83st21cbfvafgdkmledeos956btfiefg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.raes.quizmonke",
+            "certificate_hash": "e86c1a3d39b352ba809b8830795e67e50e29ff96"
+          }
+        },
+        {
+          "client_id": "232118707051-544gf26bmqcm2oab2nam894vgrkds528.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd7qzOMItFNRhqXtb0kvR6eRCRgh8THJE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "232118707051-544gf26bmqcm2oab2nam894vgrkds528.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "232118707051-2c7oksovuimt3e6opu7t0muk1apjtl82.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.quizmonke.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

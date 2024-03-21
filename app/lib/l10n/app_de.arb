@@ -1,0 +1,70 @@
+{
+    "@@locale": "de",
+    "quiz": "Quiz",
+    "summary": "Zusammenfassung",
+    "outline": "Übersicht",
+    "preview": "Vorschau",
+    "generateQuiz": "Quiz generieren",
+    "generateSummary": "Zusammenfassung generieren",
+    "generateOutline": "Übersicht generieren",
+    "nextQuestion": "Nächste Frage",
+    "congratulations": "Herzlichen Glückwunsch!",
+    "answerCorrect": "Ihre Antwort ist korrekt!",
+    "bluh": "Bluh!",
+    "answerWrong": "Ihre Antwort ist falsch! Die richtige Antwort ist {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Richtige Antwort"
+            }
+        }
+    },
+    "yourAnswer": "Ihre Antwort",
+    "skip": "Überspringen",
+    "skipped": "Übersprungen!",
+    "answerSkipped": "Sie haben diese Frage übersprungen! Die richtige Antwort ist {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Richtige Antwort"
+            }
+        }
+    },
+    "tryAgain": "Erneut versuchen",
+    "checkAnswer": "Antwort überprüfen",
+    "quizCompleted": "Quiz abgeschlossen!",
+    "resultsOverview": "Ergebnisübersicht:",
+    "correctLabel": "Richtig:",
+    "wrongLabel": "Falsch:",
+    "skippedLabel": "Übersprungen:",
+    "generateMore": "Mehr generieren",
+    "back": "Zurück",
+    "done": "Fertig",
+    "account": "Konto",
+    "deleteTopic": "Thema löschen!",
+    "areYouSure": "Sind Sie sicher?",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "loading": "Wird geladen...",
+    "oops": "Hoppla! Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.",
+    "welcomeText": "Willkommen bei QuizMonke!",
+    "noTopicsText": "Es sieht so aus, als hätten Sie noch keine Themen erstellt. Legen Sie los, indem Sie einige Texte scannen, und QuizMonke wird Ihnen helfen, daraus Quiz, Zusammenfassungen und mehr zu erstellen!",
+    "unsupportedQuestion": "Nicht unterstützter Fragetyp: {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "falsch_formatierter_Typ"
+            }
+        }
+    },
+    "error": "Fehler",
+    "questionTooHard": "Frage zu schwer",
+    "questionTooSimple": "Frage zu einfach",
+    "incorrectCorrectAnswer": "Falsche korrekte Antwort",
+    "other": "Andere",
+    "moreQuestions": "Mehr Fragen",
+    "generateDetails": "Details generieren"
+}

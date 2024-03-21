@@ -1,0 +1,70 @@
+{
+    "@@locale": "nl",
+    "quiz": "Quiz",
+    "summary": "Samenvatting",
+    "outline": "Overzicht",
+    "preview": "Voorbeeld",
+    "generateQuiz": "Genereer quiz",
+    "generateSummary": "Genereer samenvatting",
+    "generateOutline": "Genereer overzicht",
+    "nextQuestion": "Volgende Vraag",
+    "congratulations": "Gefeliciteerd!",
+    "answerCorrect": "Uw antwoord is correct!",
+    "bluh": "Bluh!",
+    "answerWrong": "Uw antwoord is onjuist! Het juiste antwoord is {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Correct antwoord"
+            }
+        }
+    },
+    "yourAnswer": "Uw Antwoord",
+    "skip": "Overslaan",
+    "skipped": "Overgeslagen!",
+    "answerSkipped": "U hebt deze vraag overgeslagen! Het juiste antwoord is {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Correct antwoord"
+            }
+        }
+    },
+    "tryAgain": "Probeer opnieuw",
+    "checkAnswer": "Controleer Antwoord",
+    "quizCompleted": "Quiz voltooid!",
+    "resultsOverview": "Resultaten Overzicht:",
+    "correctLabel": "Correct:",
+    "wrongLabel": "Onjuist:",
+    "skippedLabel": "Overgeslagen:",
+    "generateMore": "Genereer meer",
+    "back": "Terug",
+    "done": "Klaar",
+    "account": "Account",
+    "deleteTopic": "Verwijder Topic!",
+    "areYouSure": "Weet u het zeker?",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "loading": "Laden...",
+    "oops": "Oeps! Er is iets misgegaan. Probeer het later opnieuw.",
+    "welcomeText": "Welkom bij QuizMonke!",
+    "noTopicsText": "Het lijkt erop dat je nog geen onderwerpen hebt aangemaakt. Begin door wat teksten te scannen, en QuizMonke zal je helpen ze om te zetten in quizzes, samenvattingen en meer!",
+    "unsupportedQuestion": "Niet-ondersteund vraagtype: {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "verkeerd_geformatteerd_type"
+            }
+        }
+    },
+    "error": "Fout",
+    "questionTooHard": "Vraag te moeilijk",
+    "questionTooSimple": "Vraag te eenvoudig",
+    "incorrectCorrectAnswer": "Onjuist correct antwoord",
+    "other": "Anders",
+    "moreQuestions": "Meer vragen",
+    "generateDetails": "Genereer details"
+}

@@ -1,0 +1,70 @@
+{
+    "@@locale": "en",
+    "quiz": "Quiz",
+    "summary": "Summary",
+    "outline": "Outline",
+    "preview": "Preview",
+    "generateQuiz": "Generate Quiz",
+    "generateSummary": "Generate Summary",
+    "generateOutline": "Generate Outline",
+    "nextQuestion": "Next Question",
+    "congratulations": "Congratulations!",
+    "answerCorrect": "Your answer is correct!",
+    "bluh": "Bluh!",
+    "answerWrong": "Your answer is wrong! The correct answer is {correctAnswer}",
+    "@answerWrong": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Correct answer"
+            }
+        }
+    },
+    "yourAnswer": "Your Answer",
+    "skip": "Skip",
+    "skipped": "Skipped!",
+    "answerSkipped": "You skipped this question! The correct answer is {correctAnswer}",
+    "@answerSkipped": {
+        "placeholders": {
+            "correctAnswer": {
+                "type": "String",
+                "example": "Correct answer"
+            }
+        }
+    },
+    "tryAgain": "Try Again",
+    "checkAnswer": "Check Answer",
+    "quizCompleted": "Quiz completed!",
+    "resultsOverview": "Results Overview:",
+    "correctLabel": "Correct:",
+    "wrongLabel": "Wrong:",
+    "skippedLabel": "Skipped:",
+    "generateMore": "Generate more",
+    "back": "Back",
+    "done": "Done",
+    "account": "Account",
+    "deleteTopic": "Delete Topic!",
+    "areYouSure": "Are you sure?",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "oops": "Oops! Something went wrong. Please try again later.",
+    "welcomeText": "Welcome to QuizMonke!",
+    "noTopicsText": "It looks like you haven't created any topics yet. Get started by scanning some texts, and QuizMonke will help you turn them into quizzes, summaries, and more!",
+    "unsupportedQuestion": "Unsupported question type: {type}",
+    "@unsupportedQuestion": {
+        "placeholders": {
+            "type": {
+                "type": "String",
+                "example": "wrongly_formatted_type"
+            }
+        }
+    },
+    "error": "Error",
+    "questionTooHard": "Question too hard",
+    "questionTooSimple": "Question too simple",
+    "incorrectCorrectAnswer": "Incorrect correct answer",
+    "other": "Other",
+    "moreQuestions": "More questions",
+    "generateDetails": "Generate details"
+}
